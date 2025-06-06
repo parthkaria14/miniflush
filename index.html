@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3 Patti - Dealer View</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .controls {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #333;
+            border-radius: 5px;
+        }
+        .mode-switch {
+            margin-bottom: 10px;
+        }
+        .player-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .player-box {
+            background: #333;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .player-box.active {
+            border: 2px solid #4CAF50;
+        }
+        .dealer-box {
+            background: #444;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .card {
+            display: inline-block;
+            width: 60px;
+            height: 90px;
+            background: white;
+            color: black;
+            margin: 5px;
+            border-radius: 5px;
+            line-height: 90px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .card.red {
+            color: red;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        .card-selector {
+            margin: 10px 0;
+            display: none;
+        }
+        .card-selector.show {
+            display: block;
+        }
+        select {
+            padding: 5px;
+            margin-right: 10px;
+        }
+        .result {
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .win { color: #4CAF50; }
+        .lose { color: #f44336; }
+        .draw { color: #2196F3; }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="controls">
+            <div class="mode-switch">
+                <button onclick="switchMode('automatic')" id="autoMode">Automatic Mode</button>
+                <button onclick="switchMode('manual')" id="manualMode">Manual Mode</button>
+            </div>
+            <button onclick="startGame()" id="startBtn">Start Game</button>
+            <button onclick="resetTable()" id="resetBtn">Reset Table</button>
+            <button onclick="revealHands()" id="revealBtn" disabled>Reveal Hands</button>
+            <button onclick="openPlayerView()" id="playerViewBtn">Open Player View</button>
+        </div>
+
+        <div class="dealer-box">
+            <h3>Dealer's Hand</h3>
+            <div id="dealerHand" class="hand"></div>
+            <div class="card-selector" id="dealerCardSelector">
+                <select id="dealerCardRank">
+                    <option value="A">Ace</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="T">10</option>
+                    <option value="J">Jack</option>
+                    <option value="Q">Queen</option>
+                    <option value="K">King</option>
+                </select>
+                <select id="dealerCardSuit">
+                    <option value="H">Hearts</option>
+                    <option value="D">Diamonds</option>
+                    <option value="C">Clubs</option>
+                    <option value="S">Spades</option>
+                </select>
+                <button onclick="addCard('dealer')">Add Card</button>
+            </div>
+        </div>
+
+        <div class="player-grid" id="playerGrid"></div>
+    </div>
+
+    <script>
+        let ws;
+        let currentMode = 'automatic';
+        let gameState = {
+            dealer_hand: [],
+            players: {},
+            game_phase: 'waiting'
+        };
+
+        function connectWebSocket() {
+            ws = new WebSocket('ws://localhost:6789');
+            
+            ws.onopen = () => {
+                console.log('Connected to server');
+            };
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                handleServerMessage(data);
+            };
+            
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+            
+            ws.onclose = () => {
+                console.log('Disconnected from server');
+                setTimeout(connectWebSocket, 1000);
+            };
+        }
+
+        function handleServerMessage(data) {
+            if (data.action === 'update_game' || data.action === 'cards_dealt' || 
+                data.action === 'hands_revealed' || data.action === 'card_added') {
+                gameState = data.game_state;
+                updateUI();
+            }
+        }
+
+        function updateUI() {
+            // Update dealer's hand
+            const dealerHand = document.getElementById('dealerHand');
+            dealerHand.innerHTML = gameState.dealer_hand.map(card => createCardElement(card)).join('');
+
+            // Update player grid
+            const playerGrid = document.getElementById('playerGrid');
+            playerGrid.innerHTML = '';
+            
+            for (const [playerId, player] of Object.entries(gameState.players)) {
+                const playerBox = document.createElement('div');
+                playerBox.className = `player-box ${player.active ? 'active' : ''}`;
+                
+                playerBox.innerHTML = `
+                    <h3>${playerId}</h3>
+                    <div class="hand">${player.hand.map(card => createCardElement(card)).join('')}</div>
+                    ${player.active ? `
+                        <div class="card-selector" id="${playerId}CardSelector">
+                            <select id="${playerId}CardRank">
+                                <option value="A">Ace</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="T">10</option>
+                                <option value="J">Jack</option>
+                                <option value="Q">Queen</option>
+                                <option value="K">King</option>
+                            </select>
+                            <select id="${playerId}CardSuit">
+                                <option value="H">Hearts</option>
+                                <option value="D">Diamonds</option>
+                                <option value="C">Clubs</option>
+                                <option value="S">Spades</option>
+                            </select>
+                            <button onclick="addCard('${playerId}')">Add Card</button>
+                        </div>
+                    ` : ''}
+                    ${player.result ? `<div class="result ${player.result}">${player.result.toUpperCase()}</div>` : ''}
+                    <button onclick="${player.active ? 'removePlayer' : 'addPlayer'}('${playerId}')">
+                        ${player.active ? 'Remove' : 'Add'} Player
+                    </button>
+                `;
+                
+                playerGrid.appendChild(playerBox);
+            }
+
+            // Update card selectors visibility
+            const cardSelectors = document.querySelectorAll('.card-selector');
+            cardSelectors.forEach(selector => {
+                selector.classList.toggle('show', currentMode === 'manual');
+            });
+
+            // Update buttons state
+            document.getElementById('revealBtn').disabled = gameState.game_phase !== 'dealing';
+        }
+
+        function createCardElement(card) {
+            const suit = card.slice(-1);
+            const rank = card.slice(0, -1);
+            const isRed = suit === 'H' || suit === 'D';
+            return `<div class="card ${isRed ? 'red' : ''}">${rank}${getSuitSymbol(suit)}</div>`;
+        }
+
+        function getSuitSymbol(suit) {
+            switch(suit) {
+                case 'H': return '♥';
+                case 'D': return '♦';
+                case 'C': return '♣';
+                case 'S': return '♠';
+                default: return suit;
+            }
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            if (mode === 'manual') {
+                ws.send(JSON.stringify({ action: 'start_manual' }));
+            }
+            updateUI();
+        }
+
+        function startGame() {
+            if (currentMode === 'automatic') {
+                ws.send(JSON.stringify({ action: 'start_automatic' }));
+            } else {
+                ws.send(JSON.stringify({ action: 'shuffle_deck' }));
+            }
+        }
+
+        function resetTable() {
+            ws.send(JSON.stringify({ action: 'reset_table' }));
+        }
+
+        function revealHands() {
+            ws.send(JSON.stringify({ action: 'reveal_hands' }));
+        }
+
+        function addPlayer(playerId) {
+            ws.send(JSON.stringify({ action: 'add_player', player: playerId }));
+        }
+
+        function removePlayer(playerId) {
+            ws.send(JSON.stringify({ action: 'remove_player', player: playerId }));
+        }
+
+        function addCard(target) {
+            const rank = document.getElementById(`${target}CardRank`).value;
+            const suit = document.getElementById(`${target}CardSuit`).value;
+            const card = rank + suit;
+            
+            ws.send(JSON.stringify({
+                action: 'add_card',
+                card: card,
+                target: target
+            }));
+        }
+
+        function openPlayerView() {
+            window.open('player.html', '_blank');
+        }
+
+        // Initialize WebSocket connection when page loads
+        window.onload = connectWebSocket;
+    </script>
+</body>
+</html>
