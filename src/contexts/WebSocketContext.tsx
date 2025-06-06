@@ -4,11 +4,13 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 
 interface GameState {
   dealer_hand: string[];
+  dealer_combination?: string;
   players: {
     [key: string]: {
       hand: string[];
       active: boolean;
       result: string | null;
+      combination?: string;
     };
   };
   game_phase: string;

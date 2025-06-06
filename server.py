@@ -7,6 +7,7 @@ import random
 import asyncio
 import logging
 from pymongo.errors import ServerSelectionTimeoutError
+import copy
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -20,7 +21,6 @@ db = client[DB_NAME]
 wins_collection = db[COLLECTION_NAME]
 
 connected_clients = set()
-
 
 # Global game state
 game_state = {
@@ -44,6 +44,10 @@ game_state = {
     "cards_dealt": 0
 }
 
+# Add state history for undo functionality
+state_history = []
+MAX_HISTORY = 10  # Keep last 10 states
+
 # Hand rankings for Mini Flush (Teen Patti)
 HAND_RANKINGS = {
     "trail": 7,           # Three of a Kind
@@ -54,6 +58,20 @@ HAND_RANKINGS = {
     "high_card": 2        # High Card
 }
 
+def save_state():
+    """Saves current game state to history for undo functionality."""
+    global state_history, game_state
+    
+    # Create a deep copy of the current state
+    state_copy = copy.deepcopy(game_state)
+    state_history.append(state_copy)
+    
+    # Keep only the last MAX_HISTORY states
+    if len(state_history) > MAX_HISTORY:
+        state_history.pop(0)
+    
+    print(f"State saved. History length: {len(state_history)}")
+
 def create_deck():
     """Creates and shuffles 6 standard decks for Mini Flush."""
     ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K"]
@@ -63,7 +81,6 @@ def create_deck():
     
     random.shuffle(full_deck)
     return full_deck
-
 
 def get_card_value(card):
     """Gets numeric value of card for comparison."""
@@ -86,7 +103,6 @@ def get_card_suit(card):
     return card[-1]
 
 def evaluate_hand(hand):
-   
     if len(hand) != 3:
         return ("high_card", 0)
     
@@ -131,7 +147,6 @@ def evaluate_hand(hand):
     
     # High Card - use multipliers to ensure proper hierarchy (highest card dominates)
     return ("high_card", values[0] * 10000 + values[1] * 100 + values[2])
-
 
 def compare_hands(player_hand, dealer_hand):
     """Compares player hand vs dealer hand. Returns 1 if player wins, -1 if dealer wins, 0 if tie."""
@@ -216,37 +231,21 @@ async def handle_connection(websocket):
     finally:
         connected_clients.remove(websocket)
 
-
 async def handle_shuffle_deck():
     """Shuffles the deck and optionally burns a card."""
     global game_state
+    
+    # Save state before making changes
+    save_state()
+    
     game_state["deck"] = create_deck()
     game_state["burned_cards"] = []
-    
-    # #burn the top card
-    # if game_state["deck"]:
-    #     burned_card = game_state["deck"].pop(0)
-    #     game_state["burned_cards"].append(burned_card)
-    #     print(f"Deck shuffled, burned card: {burned_card}")
     
     await broadcast({
         "action": "deck_shuffled",
         "deck_size": len(game_state["deck"]),
         "burned_cards": len(game_state["burned_cards"])
     })
-
-# async def handle_burn_card():
-#     """Burns the top card from deck."""
-#     global game_state
-#     if game_state["deck"]:
-#         burned_card = game_state["deck"].pop(0)
-#         game_state["burned_cards"].append(burned_card)
-        
-#         await broadcast({
-#             "action": "card_burned",
-#             "deck_size": len(game_state["deck"]),
-#             "burned_cards": len(game_state["burned_cards"])
-#         })
 
 async def handle_deal_cards():
     """Deals 3 cards to each active player and dealer."""
@@ -256,12 +255,22 @@ async def handle_deal_cards():
         await broadcast({"action": "error", "message": "Not enough cards in deck"})
         return
     
+    # Save state before making changes
+    save_state()
+    
     # Reset hands
     game_state["dealer_hand"] = []
     for player in game_state["players"].values():
         player["hand"] = []
         player["result"] = None
+        # Clear combination if it exists
+        if "combination" in player:
+            del player["combination"]
     
+    # Clear dealer combination if it exists
+    if "dealer_combination" in game_state:
+        del game_state["dealer_combination"]
+
     # Deal 3 cards to dealer
     for _ in range(3):
         if game_state["deck"]:
@@ -291,6 +300,9 @@ async def handle_add_player(player_id=None):
     """Adds a player to the game."""
     global game_state
     
+    # Save state before making changes
+    save_state()
+    
     if player_id is None:
         # Find first inactive player
         for pid, player in game_state["players"].items():
@@ -311,10 +323,15 @@ async def handle_remove_player(player_id):
     """Removes a player from the game."""
     global game_state
     
+    # Save state before making changes
+    save_state()
+    
     if player_id in game_state["players"]:
         game_state["players"][player_id]["active"] = False
         game_state["players"][player_id]["hand"] = []
         game_state["players"][player_id]["result"] = None
+        if "combination" in game_state["players"][player_id]:
+            del game_state["players"][player_id]["combination"]
         
         await broadcast({
             "action": "player_removed",
@@ -324,12 +341,21 @@ async def handle_remove_player(player_id):
 
 async def handle_reset_table():
     """Resets the entire game state."""
-    global game_state
+    global game_state, state_history
+    
+    # Save state before making changes
+    save_state()
     
     game_state["dealer_hand"] = []
     for player in game_state["players"].values():
         player["hand"] = []
         player["result"] = None
+        if "combination" in player:
+            del player["combination"]
+    
+    if "dealer_combination" in game_state:
+        del game_state["dealer_combination"]
+        
     game_state["game_phase"] = "waiting"
     game_state["winners"] = []
     game_state["current_dealing_player"] = None
@@ -345,23 +371,23 @@ async def handle_reset_table():
         }
     })
 
-
 async def handle_undo_last():
-    """Undoes the last action (simplified version)."""
-    global game_state
+    """Undoes the last action by restoring previous state."""
+    global game_state, state_history
     
-    if game_state["game_phase"] == "revealed":
-        # Undo reveal
-        game_state["game_phase"] = "dealing"
-        game_state["winners"] = []
-        for player in game_state["players"].values():
-            player["result"] = None
-    elif game_state["game_phase"] == "dealing":
-        # Undo deal
-        game_state["dealer_hand"] = []
-        for player in game_state["players"].values():
-            player["hand"] = []
-        game_state["game_phase"] = "waiting"
+    if not state_history:
+        await broadcast({
+            "action": "error", 
+            "message": "No previous state to undo to"
+        })
+        print("No previous state available for undo")
+        return
+    
+    # Restore the last saved state
+    previous_state = state_history.pop()
+    game_state = copy.deepcopy(previous_state)
+    
+    print(f"Undid last action. History length: {len(state_history)}")
     
     await broadcast({
         "action": "undo_completed",
@@ -369,13 +395,18 @@ async def handle_undo_last():
             "dealer_hand": game_state["dealer_hand"],
             "players": game_state["players"],
             "game_phase": game_state["game_phase"],
-            "winners": game_state["winners"]
+            "winners": game_state["winners"],
+            "deck_size": len(game_state["deck"]),
+            "burned_cards": len(game_state["burned_cards"])
         }
     })
 
 async def handle_reveal_hands():
     """Reveals all hands and calculates winners."""
     global game_state
+    
+    # Save state before making changes
+    save_state()
     
     game_state["game_phase"] = "revealed"
     game_state["winners"] = []
@@ -411,11 +442,14 @@ async def handle_reveal_hands():
             "game_phase": game_state["game_phase"],
             "winners": game_state["winners"]
         }
-    })   
+    })
 
 async def handle_add_card(card, target="dealer"):
     """Adds a specific card to dealer or player hand for manual corrections."""
     global game_state
+    
+    # Save state before making changes
+    save_state()
     
     # Check for duplicate cards across all hands and burned cards
     all_cards = game_state["dealer_hand"] + game_state["burned_cards"]
@@ -482,6 +516,10 @@ async def start_manual():
 async def handle_change_bet(min_bet, max_bet):
     """Changes the minimum and maximum bet values."""
     global game_state
+    
+    # Save state before making changes
+    save_state()
+    
     game_state["min_bet"] = min_bet
     game_state["max_bet"] = max_bet
     
@@ -503,6 +541,10 @@ async def handle_clear_records():
 async def handle_table_number(table_number):
     """Sets the table number."""
     global game_state
+    
+    # Save state before making changes
+    save_state()
+    
     game_state["table_number"] = table_number
     
     await broadcast({
@@ -515,7 +557,7 @@ async def record_wins(winners):
     win_record = {
         "winners": winners,
         "dealer_hand": game_state["dealer_hand"],
-        "dealer_combination": game_state.get("dealer_combination", "unknown"),  # Add dealer combination
+        "dealer_combination": game_state.get("dealer_combination", "unknown"),
         "players": {pid: player for pid, player in game_state["players"].items() if player["active"]},
         "timestamp": datetime.utcnow(),
     }
@@ -558,7 +600,6 @@ async def main():
         print("Mini Flush WebSocket server running on ws://localhost:6789")
         await asyncio.Future()
 
-
 async def check_connection():
     try:
         await client.admin.command('ping')
@@ -570,6 +611,3 @@ async def check_connection():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-
-

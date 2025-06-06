@@ -37,12 +37,7 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
         <div>
           <h3 className="text-lg font-semibold text-gray-800">
             {isDealer ? 'Dealer' : playerId}
-          </h3>
-          {combination && showCards && (
-            <p className="text-sm text-gray-600 mt-1">
-              {combination.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-            </p>
-          )}
+           </h3>
         </div>
         {result && (
           <span className={`font-bold ${getResultColor()}`}>
@@ -50,6 +45,11 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
           </span>
         )}
       </div>
+      {combination && (isDealer || showCards) && (
+        <p className="text-sm text-gray-600 mb-2">
+          {combination.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+        </p>
+      )}
       
       <div className="flex gap-2 justify-center">
         {hand.map((card, index) => (

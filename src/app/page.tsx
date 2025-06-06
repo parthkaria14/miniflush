@@ -64,7 +64,7 @@ export default function DealerView() {
     }
     setLastUndoneAction(action);
     sendMessage({ action: 'undo_last' });
-    setTimeout(() => setLastUndoneAction(null), 3000); // Clear message after 3 seconds
+    setTimeout(() => setLastUndoneAction(null), 2000); // Clear message after 3 seconds
   };
 
   return (
