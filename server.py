@@ -471,7 +471,7 @@ async def start_automatic():
     await asyncio.sleep(2)
     
     # Step 3: Reveal hands
-    await handle_reveal_hands()
+    # await handle_reveal_hands()
 
 async def start_manual():
     """Starts manual mode - just shuffle the deck."""
