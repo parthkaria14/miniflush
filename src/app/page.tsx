@@ -119,10 +119,17 @@ export default function DealerView() {
             </button>
             <button
               onClick={handleResetTable}
+              className={`px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors duration-200 ${!isConnected && 'opacity-50 cursor-not-allowed'}`}
+              disabled={!isConnected || isLoading}
+            >
+              Reset Game
+            </button>
+            <button
+              onClick={() => sendMessage({ action: 'clear_records' })}
               className={`px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200 ${!isConnected && 'opacity-50 cursor-not-allowed'}`}
               disabled={!isConnected || isLoading}
             >
-              Reset Table
+              Clear All Records
             </button>
           </div>
           {lastUndoneAction && (

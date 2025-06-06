@@ -204,6 +204,8 @@ async def handle_connection(websocket):
                 await delete_win()
             elif data["action"] == "delete_all_wins":
                 await delete_all_wins()
+            elif data["action"] == "clear_records":
+                await handle_clear_records()
             elif data["action"] == "start_automatic":
                 await start_automatic()
             elif data["action"] == "start_manual":
@@ -478,16 +480,25 @@ async def start_manual():
     await handle_shuffle_deck()
 
 async def handle_change_bet(min_bet, max_bet):
-    """Changes the bet limits."""
+    """Changes the minimum and maximum bet values."""
     global game_state
     game_state["min_bet"] = min_bet
     game_state["max_bet"] = max_bet
     
     await broadcast({
-        "action": "bets_changed",
-        "minBet": min_bet,
-        "maxBet": max_bet
+        "action": "bet_changed",
+        "min_bet": min_bet,
+        "max_bet": max_bet
     })
+
+async def handle_clear_records():
+    """Clears all game records from the database."""
+    try:
+        await wins_collection.delete_many({})
+        await broadcast({"action": "records_cleared", "message": "All game records have been cleared."})
+    except Exception as e:
+        logging.error(f"Error clearing records: {e}")
+        await broadcast({"action": "error", "message": "Failed to clear game records."})
 
 async def handle_table_number(table_number):
     """Sets the table number."""
@@ -504,6 +515,7 @@ async def record_wins(winners):
     win_record = {
         "winners": winners,
         "dealer_hand": game_state["dealer_hand"],
+        "dealer_combination": game_state.get("dealer_combination", "unknown"),  # Add dealer combination
         "players": {pid: player for pid, player in game_state["players"].items() if player["active"]},
         "timestamp": datetime.utcnow(),
     }
