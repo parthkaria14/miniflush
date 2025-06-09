@@ -12,6 +12,8 @@ export default function PlayerView() {
   const [hasPlayed, setHasPlayed] = useState(false);
   const [hasSurrendered, setHasSurrendered] = useState(false);
   const [showDealerCards, setShowDealerCards] = useState(false);
+  // Track which players have played or surrendered
+  const [playerActions, setPlayerActions] = useState<{[playerId: string]: 'play' | 'surrender' | null}>({});
 
   const activePlayers = Object.entries(gameState.players)
     .filter(([_, player]) => player.active)
@@ -26,23 +28,51 @@ export default function PlayerView() {
       setHasPlayed(false);
       setHasSurrendered(false);
       setShowDealerCards(false);
+      setPlayerActions({});
+    }
+    // Reset actions when cards are dealt
+    if (gameState.game_phase === 'dealing') {
+      setPlayerActions({});
+      setShowDealerCards(false);
     }
   }, [gameState.game_phase]);
+  
+  // Track player actions based on server updates
+  useEffect(() => {
+    const initialPlayerActions: {[playerId: string]: 'play' | 'surrender' | null} = {};
+    Object.entries(gameState.players).forEach(([playerId, player]) => {
+      if (player.has_acted) {
+        // Determine if player played or surrendered based on server-side logic if available
+        // For now, we'll just mark them as 'play' if they've acted.
+        initialPlayerActions[playerId] = 'play'; 
+      }
+    });
+    setPlayerActions(initialPlayerActions);
+
+    // If all active players have played or surrendered, reveal dealer cards
+    const activePlayers = Object.entries(gameState.players)
+      .filter(([_, player]) => player.active)
+      .map(([playerId]) => playerId);
+    const allActed = activePlayers.every(pid => gameState.players[pid]?.has_acted);
+    if (activePlayers.length > 0 && allActed) {
+      setShowDealerCards(true);
+    } else {
+      setShowDealerCards(false);
+    }
+  }, [gameState.players]);
   
   // Handle play action
   const handlePlay = () => {
     setHasPlayed(true);
-    setShowDealerCards(true); // Show dealer cards only when playing
-    // You could send a message to the server here if needed
-    // sendMessage({ action: "player_played", player: selectedPlayer });
+    // setPlayerActions(prev => ({ ...prev, [selectedPlayer!]: 'play' })); // This will now be updated by server message
+    sendMessage({ action: "player_played", player: selectedPlayer });
   };
-  
+
   // Handle surrender action
   const handleSurrender = () => {
     setHasSurrendered(true);
-    // Keep dealer cards hidden when surrendering
-    // You could send a message to the server here if needed
-    // sendMessage({ action: "player_surrendered", player: selectedPlayer });
+    // setPlayerActions(prev => ({ ...prev, [selectedPlayer!]: 'surrender' })); // This will now be updated by server message
+    sendMessage({ action: "player_surrendered", player: selectedPlayer });
   };
 
   return (
@@ -117,7 +147,7 @@ export default function PlayerView() {
                     active={true}
                     result={null}
                     isDealer={true}
-                    showCards={true}
+                    showCards={showDealerCards}
                     combination={gameState.dealer_combination}
                     dealerQualifies={gameState.dealer_qualifies}
                   />

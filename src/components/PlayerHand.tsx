@@ -11,6 +11,7 @@ interface PlayerHandProps {
   onAddCard?: (playerId: string) => void;
   combination?: string;
   dealerQualifies?: boolean;
+  selectingCardFor?: string | null;
 }
 
 const PlayerHand: React.FC<PlayerHandProps> = ({
@@ -22,7 +23,8 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
   showCards = false,
   onAddCard,
   combination,
-  dealerQualifies
+  dealerQualifies,
+  selectingCardFor
 }) => {
   const getResultColor = () => {
     switch (result) {
@@ -61,6 +63,7 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
       )}
       
       <div className="flex gap-2 justify-center">
+        {/* Show actual cards if revealed, otherwise show card backs for each added card */}
         {hand.map((card, index) => (
           <Card
             key={`${card}-${index}`}
@@ -68,7 +71,8 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
             hidden={!showCards && !isDealer}
           />
         ))}
-        {active && hand.length < 3 && onAddCard && (
+        {/* In manual mode, if not revealed, show card backs for each added card, and only show add button for next slot */}
+        {active && hand.length < 3 && onAddCard && !showCards && selectingCardFor !== playerId && (
           <button
             onClick={() => onAddCard(playerId)}
             className="w-20 h-28 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:border-gray-400 transition-colors"

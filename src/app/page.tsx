@@ -13,6 +13,7 @@ export default function DealerView() {
   const [playerNumber, setPlayerNumber] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showDealerCards, setShowDealerCards] = useState(false);
 
   // Count active players
   const activePlayers = Object.values(gameState.players).filter(player => player.active).length;
@@ -118,6 +119,22 @@ export default function DealerView() {
     ws.addEventListener('message', handleMessage);
     return () => ws.removeEventListener('message', handleMessage);
   }, []);
+
+  useEffect(() => {
+    const allPlayersActed = Object.values(gameState.players)
+      .filter(player => player.active)
+      .every(player => player.has_acted);
+
+    // Dealer's cards are shown if all players have acted AND the game is in the 'dealing' phase,
+    // or if the game is in the 'revealed' or 'betting' phase (which implies cards should be visible).
+    if (allPlayersActed && gameState.game_phase === 'dealing') {
+      setShowDealerCards(true);
+    } else if (gameState.game_phase === 'revealed' || gameState.game_phase === 'betting') {
+      setShowDealerCards(true);
+    } else {
+      setShowDealerCards(false);
+    }
+  }, [gameState.players, gameState.game_phase]);
 
   // Clear error message after 3 seconds
   useEffect(() => {
@@ -234,10 +251,11 @@ export default function DealerView() {
               active={true}
               result={null}
               isDealer={true}
-              showCards={true}
+              showCards={showDealerCards}
               onAddCard={isManualMode ? handleAddCard : undefined}
               combination={gameState.dealer_combination}
               dealerQualifies={gameState.dealer_qualifies}
+              selectingCardFor={null}
             />
           </div>
 
@@ -252,6 +270,7 @@ export default function DealerView() {
                   showCards={gameState.game_phase === 'revealed'}
                   onAddCard={isManualMode ? handleAddCard : undefined}
                   combination={player.combination}
+                  selectingCardFor={selectedPlayer}
                 />
                 {player.active && (
                   <button

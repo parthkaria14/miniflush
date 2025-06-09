@@ -303,6 +303,10 @@ async def handle_connection(websocket):
                 await start_automatic()
             elif data["action"] == "start_manual":
                 await start_manual()
+            elif data["action"] == "player_played":
+                await handle_player_played(data.get("player"))
+            elif data["action"] == "player_surrendered":
+                await handle_player_surrendered(data.get("player"))
 
     except websockets.ConnectionClosed:
         print(f"Client disconnected: {websocket.remote_address}")
@@ -341,6 +345,7 @@ async def handle_deal_cards():
     for player in game_state["players"].values():
         player["hand"] = []
         player["result"] = None
+        player["has_acted"] = False # Initialize has_acted for each player
         # Clear all combination types if they exist
         for key in ["high_combination", "low_combination", "ante_result"]:
             if key in player:
@@ -465,6 +470,7 @@ async def handle_reset_table():
     for player in game_state["players"].values():
         player["hand"] = []
         player["result"] = None
+        player["has_acted"] = False # Initialize has_acted for each player
         # Clear all combination types
         for key in ["high_combination", "low_combination", "ante_result"]:
             if key in player:
@@ -695,8 +701,30 @@ async def handle_table_number(table_number):
     
     await broadcast({
         "action": "table_number_set",
-        "tableNumber": table_number
+        "table_number": game_state["table_number"]
     })
+
+async def handle_player_played(player_id):
+    global game_state
+    if player_id and player_id in game_state["players"]:
+        game_state["players"][player_id]["has_acted"] = True
+        await broadcast({
+            "action": "player_acted",
+            "player_id": player_id,
+            "action_type": "play",
+            "game_state": game_state
+        })
+
+async def handle_player_surrendered(player_id):
+    global game_state
+    if player_id and player_id in game_state["players"]:
+        game_state["players"][player_id]["has_acted"] = True
+        await broadcast({
+            "action": "player_acted",
+            "player_id": player_id,
+            "action_type": "surrender",
+            "game_state": game_state
+        })
 
 async def record_wins(winners):
     """Records game wins in MongoDB."""
