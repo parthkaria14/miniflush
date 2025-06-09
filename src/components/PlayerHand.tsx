@@ -10,6 +10,7 @@ interface PlayerHandProps {
   showCards?: boolean;
   onAddCard?: (playerId: string) => void;
   combination?: string;
+  dealerQualifies?: boolean;
 }
 
 const PlayerHand: React.FC<PlayerHandProps> = ({
@@ -20,7 +21,8 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
   isDealer = false,
   showCards = false,
   onAddCard,
-  combination
+  combination,
+  dealerQualifies
 }) => {
   const getResultColor = () => {
     switch (result) {
@@ -45,9 +47,16 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
           </span>
         )}
       </div>
-      {combination && (isDealer || showCards) && (
+      {isDealer && dealerQualifies === false && (
+        <p className="text-sm text-red-600 mb-2 font-semibold">
+          Dealer Does Not Qualify
+        </p>
+      )}
+      {combination && ((isDealer && dealerQualifies !== false) || (!isDealer && showCards)) && (
         <p className="text-sm text-gray-600 mb-2">
-          {combination.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+          {combination.endsWith('_top') 
+            ? `${combination.split('_')[0]} Top`
+            : combination.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
         </p>
       )}
       

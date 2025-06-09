@@ -119,6 +119,7 @@ export default function PlayerView() {
                     isDealer={true}
                     showCards={true}
                     combination={gameState.dealer_combination}
+                    dealerQualifies={gameState.dealer_qualifies}
                   />
                 ) : (
                   <div className="bg-white border-2 border-gray-200 rounded-lg p-6">

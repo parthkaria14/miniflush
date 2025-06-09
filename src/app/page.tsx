@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useWebSocket } from '@/contexts/WebSocketContext';
 import PlayerHand from '@/components/PlayerHand';
 import CardSelector from '@/components/CardSelector';
@@ -10,8 +10,18 @@ export default function DealerView() {
   const [isManualMode, setIsManualMode] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [lastUndoneAction, setLastUndoneAction] = useState<string | null>(null);
-
+  const [playerNumber, setPlayerNumber] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Count active players
+  const activePlayers = Object.values(gameState.players).filter(player => player.active).length;
+  const canAddPlayer = activePlayers < 6;
+
+  // Get list of inactive players
+  const inactivePlayers = Object.entries(gameState.players)
+    .filter(([_, player]) => !player.active)
+    .map(([id]) => id);
 
   const handleModeChange = async (mode: 'automatic' | 'manual') => {
     if (!isConnected) return;
@@ -23,7 +33,31 @@ export default function DealerView() {
   };
 
   const handleAddPlayer = () => {
-    sendMessage({ action: 'add_player' });
+    if (!canAddPlayer) {
+      setErrorMessage("Maximum of 6 players allowed");
+      return;
+    }
+
+    if (playerNumber.trim()) {
+      const num = parseInt(playerNumber.trim());
+      if (num < 1 || num > 6) {
+        setErrorMessage("Player number must be between 1 and 6");
+        return;
+      }
+      const playerId = `player${num}`;
+      if (!gameState.players[playerId].active) {
+        sendMessage({ action: 'add_player', player: playerId });
+        setPlayerNumber(''); // Clear input after adding
+      } else {
+        setErrorMessage(`${playerId} is already active`);
+      }
+    } else {
+      // Add first inactive player
+      if (inactivePlayers.length > 0) {
+        sendMessage({ action: 'add_player', player: inactivePlayers[0] });
+      }
+    }
+    setErrorMessage(null);
   };
 
   const handleRemovePlayer = (playerId: string) => {
@@ -67,6 +101,32 @@ export default function DealerView() {
     setTimeout(() => setLastUndoneAction(null), 2000); // Clear message after 3 seconds
   };
 
+  // Handle WebSocket messages
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.action === 'error') {
+          setErrorMessage(data.message);
+        }
+      } catch (error) {
+        console.error('Error processing message:', error);
+      }
+    };
+
+    const ws = new WebSocket('ws://localhost:6789');
+    ws.addEventListener('message', handleMessage);
+    return () => ws.removeEventListener('message', handleMessage);
+  }, []);
+
+  // Clear error message after 3 seconds
+  useEffect(() => {
+    if (errorMessage) {
+      const timer = setTimeout(() => setErrorMessage(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage]);
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto">
@@ -96,13 +156,35 @@ export default function DealerView() {
           </div>
 
           <div className="flex gap-4">
-            <button
-              onClick={handleAddPlayer}
-              className={`px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-200 ${!isConnected && 'opacity-50 cursor-not-allowed'}`}
-              disabled={!isConnected || isLoading}
-            >
-              Add Player
-            </button>
+            <div className="flex items-center gap-2">
+              <select
+                value={playerNumber}
+                onChange={(e) => {
+                  setPlayerNumber(e.target.value);
+                  setErrorMessage(null);
+                }}
+                className="w-32 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={!canAddPlayer}
+              >
+                <option value="">Select Player</option>
+                {inactivePlayers.map(playerId => (
+                  <option key={playerId} value={playerId.replace('player', '')}>
+                    {playerId}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={handleAddPlayer}
+                className={`px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-200 
+                  ${(!isConnected || isLoading || !canAddPlayer) && 'opacity-50 cursor-not-allowed'}`}
+                disabled={!isConnected || isLoading || !canAddPlayer}
+              >
+                Activate Player {playerNumber ? playerNumber : ''}
+              </button>
+              {!canAddPlayer && (
+                <span className="text-sm text-red-500">(Max 6 players)</span>
+              )}
+            </div>
             <button
               onClick={handleRevealHands}
               className={`px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors duration-200 ${!isConnected && 'opacity-50 cursor-not-allowed'}`}
@@ -137,6 +219,11 @@ export default function DealerView() {
               {lastUndoneAction}...
             </div>
           )}
+          {errorMessage && (
+            <div className="mt-2 p-2 bg-red-100 text-red-700 rounded text-sm">
+              {errorMessage}
+            </div>
+          )}
         </header>
 
         <main>
@@ -150,6 +237,7 @@ export default function DealerView() {
               showCards={true}
               onAddCard={isManualMode ? handleAddCard : undefined}
               combination={gameState.dealer_combination}
+              dealerQualifies={gameState.dealer_qualifies}
             />
           </div>
 
