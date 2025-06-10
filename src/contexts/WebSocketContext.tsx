@@ -18,6 +18,13 @@ interface GameState {
       active: boolean;
       result: string | null;
       combination?: string;
+      has_acted?: boolean;
+      action_type?: string;
+      high_combination?: string;
+      low_combination?: string;
+      main_bet_result?: string;
+      high_bet_result?: string;
+      low_bet_result?: string;
     };
   };
   game_phase: string;
@@ -25,6 +32,7 @@ interface GameState {
   min_bet: number;
   max_bet: number;
   table_number: number;
+  dealer_qualifies?: boolean;
 }
 
 interface WebSocketContextType {
@@ -64,6 +72,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [gameState, setGameState] = useState<GameState>(defaultGameState);
   const [isConnected, setIsConnected] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [previousGameState, setPreviousGameState] = useState<GameState | null>(null);
 
   const addNotification = (message: string, type: NotificationType) => {
     const id = Math.random().toString(36).substr(2, 9);
@@ -72,6 +81,53 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const removeNotification = (id: string) => {
     setNotifications(prev => prev.filter(notification => notification.id !== id));
+  };
+
+  const determineUndoneAction = (oldState: GameState, newState: GameState): string => {
+    // Check if it was a reveal hands action
+    if (oldState.game_phase === 'revealed' && newState.game_phase !== 'revealed') {
+      return 'Hand reveal';
+    }
+
+    // Check if it was a deal cards action
+    const oldDealerCards = oldState.dealer_hand.length;
+    const newDealerCards = newState.dealer_hand.length;
+    if (oldDealerCards === 3 && newDealerCards === 0) {
+      return 'Card deal';
+    }
+
+    // Check if it was a player action (play/surrender)
+    for (const [playerId, oldPlayer] of Object.entries(oldState.players)) {
+      const newPlayer = newState.players[playerId];
+      if (oldPlayer.has_acted && !newPlayer.has_acted) {
+        return `${playerId}'s ${oldPlayer.action_type || 'action'}`;
+      }
+    }
+
+    // Check if it was a card addition
+    for (const [playerId, oldPlayer] of Object.entries(oldState.players)) {
+      const newPlayer = newState.players[playerId];
+      if (oldPlayer.hand.length > newPlayer.hand.length) {
+        return `Card addition to ${playerId}`;
+      }
+    }
+    if (oldState.dealer_hand.length > newState.dealer_hand.length) {
+      return 'Card addition to dealer';
+    }
+
+    // Check if it was a player add/remove
+    for (const [playerId, oldPlayer] of Object.entries(oldState.players)) {
+      const newPlayer = newState.players[playerId];
+      if (oldPlayer.active && !newPlayer.active) {
+        return `Player ${playerId} removal`;
+      }
+      if (!oldPlayer.active && newPlayer.active) {
+        return `Player ${playerId} addition`;
+      }
+    }
+
+    // Default case
+    return 'Last action';
   };
 
   useEffect(() => {
@@ -115,26 +171,37 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             case 'update_game':
             case 'cards_dealt':
             case 'hands_revealed':
+              setPreviousGameState(gameState);
               setGameState(data.game_state);
               break;
             case 'player_added':
             case 'player_removed':
+              setPreviousGameState(gameState);
               setGameState(prev => ({
                 ...prev,
                 players: data.players
               }));
               break;
             case 'table_reset':
+              setPreviousGameState(gameState);
+              setGameState(data.game_state);
+              break;
+            case 'undo_completed':
+              if (previousGameState) {
+                const undoneAction = determineUndoneAction(previousGameState, data.game_state);
+                addNotification(`Undid ${undoneAction}`, 'info');
+              }
+              setPreviousGameState(gameState);
               setGameState(data.game_state);
               break;
             case 'duplicate_card':
-              addNotification(`Duplicate card detected: ${data.card}`, 'error');
+              addNotification('Duplicate card detected', 'error');
               break;
             case 'error':
               addNotification(data.message, 'error');
               break;
             case 'card_added':
-              addNotification(`Card ${data.card} added to ${data.target}`, 'success');
+              addNotification(`Card added to ${data.target}`, 'success');
               break;
             default:
               console.log('Unhandled message:', data);

@@ -37,9 +37,9 @@ game_state = {
     "burned_cards": [],
     "game_phase": "waiting", # waiting, dealing, revealed, finished
     "winners": [],
-    # "min_bet": 10,
-    # "max_bet": 1000,
-    # "table_number": 1,
+    "min_bet": 10,
+    "max_bet": 1000,
+    "table_number": 1,
     "current_dealing_player": None,
     "cards_dealt": 0
 }

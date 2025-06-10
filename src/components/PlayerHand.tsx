@@ -107,7 +107,7 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
           <Card
             key={`${card}-${index}`}
             card={card}
-            hidden={!showCards && !isDealer}
+            hidden={!showCards}
           />
         ))}
         {/* In manual mode, if not revealed, show card backs for each added card, and only show add button for next slot */}
