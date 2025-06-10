@@ -4,9 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { useWebSocket } from '@/contexts/WebSocketContext';
 import PlayerHand from '@/components/PlayerHand';
 import CardSelector from '@/components/CardSelector';
+import Notification from '@/components/Notification';
 
 export default function DealerView() {
-  const { gameState, sendMessage, isConnected } = useWebSocket();
+  const { gameState, sendMessage, isConnected, notifications, removeNotification } = useWebSocket();
   const [isManualMode, setIsManualMode] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [lastUndoneAction, setLastUndoneAction] = useState<string | null>(null);
@@ -146,6 +147,16 @@ export default function DealerView() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
+      {/* Display notifications */}
+      {notifications.map(notification => (
+        <Notification
+          key={notification.id}
+          message={notification.message}
+          type={notification.type}
+          onClose={() => removeNotification(notification.id)}
+        />
+      ))}
+
       <div className="max-w-7xl mx-auto">
         <header className="mb-8">
           <div className="flex justify-between items-center mb-4">
@@ -222,6 +233,13 @@ export default function DealerView() {
               disabled={!isConnected || isLoading}
             >
               Reset Game
+            </button>
+            <button
+              onClick={() => sendMessage({ action: 'delete_win' })}
+              className={`px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors duration-200 ${!isConnected && 'opacity-50 cursor-not-allowed'}`}
+              disabled={!isConnected || isLoading}
+            >
+              Delete Last Win
             </button>
             <button
               onClick={() => sendMessage({ action: 'clear_records' })}

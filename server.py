@@ -37,9 +37,9 @@ game_state = {
     "burned_cards": [],
     "game_phase": "waiting", # waiting, dealing, revealed, finished
     "winners": [],
-    "min_bet": 10,
-    "max_bet": 1000,
-    "table_number": 1,
+    # "min_bet": 10,
+    # "max_bet": 1000,
+    # "table_number": 1,
     "current_dealing_player": None,
     "cards_dealt": 0
 }
@@ -173,7 +173,7 @@ def evaluate_high_hand(hand):
         return ("pair", values[1] * 100 + values[0])  # pair value * 100 + kicker
     
     # High Card
-    # return ("high_card", values[0] * 10000 + values[1] * 100 + values[2])
+    return ("high_card", values[0] * 10000 + values[1] * 100 + values[2])
 
 def evaluate_low_hand(hand):
     """Evaluates hand for LOW side bet - returns winning condition or None."""

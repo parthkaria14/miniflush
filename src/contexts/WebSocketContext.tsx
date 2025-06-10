@@ -1,6 +1,13 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { NotificationType } from '@/components/Notification';
+
+interface Notification {
+  id: string;
+  message: string;
+  type: NotificationType;
+}
 
 interface GameState {
   dealer_hand: string[];
@@ -25,6 +32,9 @@ interface WebSocketContextType {
   gameState: GameState;
   sendMessage: (message: any) => void;
   isConnected: boolean;
+  notifications: Notification[];
+  addNotification: (message: string, type: NotificationType) => void;
+  removeNotification: (id: string) => void;
 }
 
 const defaultGameState: GameState = {
@@ -41,7 +51,10 @@ const WebSocketContext = createContext<WebSocketContextType>({
   ws: null,
   gameState: defaultGameState,
   sendMessage: () => {},
-  isConnected: false
+  isConnected: false,
+  notifications: [],
+  addNotification: () => {},
+  removeNotification: () => {}
 });
 
 export const useWebSocket = () => useContext(WebSocketContext);
@@ -50,6 +63,16 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [gameState, setGameState] = useState<GameState>(defaultGameState);
   const [isConnected, setIsConnected] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  const addNotification = (message: string, type: NotificationType) => {
+    const id = Math.random().toString(36).substr(2, 9);
+    setNotifications(prev => [...prev, { id, message, type }]);
+  };
+
+  const removeNotification = (id: string) => {
+    setNotifications(prev => prev.filter(notification => notification.id !== id));
+  };
 
   useEffect(() => {
     let websocket: WebSocket;
@@ -70,6 +93,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         console.log('Disconnected from WebSocket');
         setIsConnected(false);
         setWs(null);
+        addNotification('Disconnected from server', 'error');
 
         // Attempt to reconnect after 2 seconds
         reconnectTimeout = setTimeout(() => {
@@ -80,6 +104,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
       websocket.onerror = (error) => {
         console.error('WebSocket error:', error);
+        addNotification('Connection error occurred', 'error');
       };
 
       websocket.onmessage = (event) => {
@@ -102,16 +127,26 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             case 'table_reset':
               setGameState(data.game_state);
               break;
+            case 'duplicate_card':
+              addNotification(`Duplicate card detected: ${data.card}`, 'error');
+              break;
+            case 'error':
+              addNotification(data.message, 'error');
+              break;
+            case 'card_added':
+              addNotification(`Card ${data.card} added to ${data.target}`, 'success');
+              break;
             default:
               console.log('Unhandled message:', data);
           }
         } catch (error) {
           console.error('Error processing message:', error);
+          addNotification('Error processing server message', 'error');
         }
       };
 
       setWs(websocket);
-    };
+    }
 
     connect();
 
@@ -154,7 +189,15 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   return (
-    <WebSocketContext.Provider value={{ ws, gameState, sendMessage, isConnected }}>
+    <WebSocketContext.Provider value={{ 
+      ws, 
+      gameState, 
+      sendMessage, 
+      isConnected,
+      notifications,
+      addNotification,
+      removeNotification
+    }}>
       {children}
     </WebSocketContext.Provider>
   );

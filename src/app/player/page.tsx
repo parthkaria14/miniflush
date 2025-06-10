@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { useWebSocket } from '@/contexts/WebSocketContext';
 import PlayerHand from '@/components/PlayerHand';
+import Notification from '@/components/Notification';
 
 export default function PlayerView() {
-  const { gameState, isConnected, sendMessage } = useWebSocket();
+  const { gameState, isConnected, sendMessage, notifications, removeNotification } = useWebSocket();
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showCards, setShowCards] = useState(false);
@@ -77,6 +78,16 @@ export default function PlayerView() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
+      {/* Display notifications */}
+      {notifications.map(notification => (
+        <Notification
+          key={notification.id}
+          message={notification.message}
+          type={notification.type}
+          onClose={() => removeNotification(notification.id)}
+        />
+      ))}
+
       <div className="max-w-3xl mx-auto">
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">Mini Flush  Player View</h1>
