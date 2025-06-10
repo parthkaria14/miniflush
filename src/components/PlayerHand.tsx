@@ -9,7 +9,9 @@ interface PlayerHandProps {
   isDealer?: boolean;
   showCards?: boolean;
   onAddCard?: (playerId: string) => void;
-  combination?: string;
+  highCombination?: string;
+  lowCombination?: string;
+  mainBetResult?: string;
   dealerQualifies?: boolean;
   selectingCardFor?: string | null;
 }
@@ -22,7 +24,9 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
   isDealer = false,
   showCards = false,
   onAddCard,
-  combination,
+  highCombination,
+  lowCombination,
+  mainBetResult,
   dealerQualifies,
   selectingCardFor
 }) => {
@@ -30,9 +34,23 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
     switch (result) {
       case 'win': return 'text-green-600';
       case 'lose': return 'text-red-600';
-      case 'draw': return 'text-yellow-600';
+      case 'draw': 
+      case 'push': return 'text-yellow-600';
+      case 'ante': return 'text-blue-600';
       default: return 'text-gray-600';
     }
+  };
+
+  const getResultText = () => {
+    switch (result) {
+      case 'push': return 'ANTE';
+      case 'ante': return 'ANTE';
+      default: return result?.toUpperCase();
+    }
+  };
+
+  const formatCombination = (combination: string) => {
+    return combination.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
 
   return (
@@ -45,7 +63,7 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
         </div>
         {result && (
           <span className={`font-bold ${getResultColor()}`}>
-            {result.toUpperCase()}
+            {getResultText()}
           </span>
         )}
       </div>
@@ -54,11 +72,32 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
           Dealer Does Not Qualify
         </p>
       )}
-      {combination && ((isDealer && dealerQualifies !== false) || (!isDealer && showCards)) && (
+      
+      {/* For Dealer - Show hand combination */}
+      {isDealer && showCards && highCombination && (
         <p className="text-sm text-gray-600 mb-2">
-          {combination.endsWith('_top') 
-            ? `${combination.split('_')[0]} Top`
-            : combination.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+          Hand: {formatCombination(highCombination)}
+        </p>
+      )}
+      
+      {/* For Players - Show Main Bet and Side Bets */}
+      {!isDealer && showCards && highCombination && (
+        <p className="text-sm text-gray-600 mb-1">
+          Main Bet: {formatCombination(highCombination)}
+        </p>
+      )}
+      
+      {/* Side Bet - Show high combination if it qualifies (not high_card) */}
+      {!isDealer && showCards && highCombination && highCombination !== 'high_card' && (
+        <p className="text-sm text-gray-600 mb-1">
+          Side Bet (High): {formatCombination(highCombination)}
+        </p>
+      )}
+      
+      {/* Side Bet - Show low combination if it exists and qualifies (not 'no_qualify') */}
+      {!isDealer && showCards && lowCombination && lowCombination !== 'no_qualify' && (
+        <p className="text-sm text-gray-600 mb-2">
+          Side Bet (Low): {formatCombination(lowCombination)}
         </p>
       )}
       

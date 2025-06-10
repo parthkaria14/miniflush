@@ -149,7 +149,7 @@ export default function DealerView() {
       <div className="max-w-7xl mx-auto">
         <header className="mb-8">
           <div className="flex justify-between items-center mb-4">
-            <h1 className="text-3xl font-bold text-gray-900">3 Patti Dealer View</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Mini Flush Dealer View</h1>
             <div className={`text-sm font-medium ${isConnected ? 'text-green-600' : 'text-red-600'}`}>
               {isConnected ? '🟢 Connected to server' : '🔴 Disconnected from server'}
             </div>
@@ -253,7 +253,9 @@ export default function DealerView() {
               isDealer={true}
               showCards={showDealerCards}
               onAddCard={isManualMode ? handleAddCard : undefined}
-              combination={gameState.dealer_combination}
+              highCombination={gameState.dealer_combination}
+              lowCombination={gameState.dealer_low_combination}
+              mainBetResult={gameState.dealer_main_bet_result}
               dealerQualifies={gameState.dealer_qualifies}
               selectingCardFor={null}
             />
@@ -269,7 +271,9 @@ export default function DealerView() {
                   result={player.result}
                   showCards={gameState.game_phase === 'revealed'}
                   onAddCard={isManualMode ? handleAddCard : undefined}
-                  combination={player.combination}
+                  highCombination={player.high_combination}
+                  lowCombination={player.low_combination}
+                  mainBetResult={player.main_bet_result}
                   selectingCardFor={selectedPlayer}
                 />
                 {player.active && (

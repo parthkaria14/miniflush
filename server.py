@@ -26,12 +26,12 @@ connected_clients = set()
 game_state = {
     "dealer_hand": [],
     "players": {
-        "player1": {"hand": [], "active": False, "result": None},
-        "player2": {"hand": [], "active": False, "result": None},
-        "player3": {"hand": [], "active": False, "result": None},
-        "player4": {"hand": [], "active": False, "result": None},
-        "player5": {"hand": [], "active": False, "result": None},
-        "player6": {"hand": [], "active": False, "result": None},
+        "player1": {"hand": [], "active": False, "result": None, "has_acted": False, "action_type": None},
+        "player2": {"hand": [], "active": False, "result": None, "has_acted": False, "action_type": None},
+        "player3": {"hand": [], "active": False, "result": None, "has_acted": False, "action_type": None},
+        "player4": {"hand": [], "active": False, "result": None, "has_acted": False, "action_type": None},
+        "player5": {"hand": [], "active": False, "result": None, "has_acted": False, "action_type": None},
+        "player6": {"hand": [], "active": False, "result": None, "has_acted": False, "action_type": None},
     },
     "deck": [],
     "burned_cards": [],
@@ -48,24 +48,34 @@ game_state = {
 state_history = []
 MAX_HISTORY = 10  # Keep last 10 states
 
-# Hand rankings for Mini Flush HIGH side bet
+# Hand rankings for HIGH side bet (higher rank = better hand)
 HIGH_HAND_RANKINGS = {
-    "three_of_a_kind": 5,     # Three of a Kind
+    "high_card": 0,           # High Card (no combination)
+    "pair": 1,                # One Pair  
+    "flush": 2,               # Flush (all same suit)
+    "straight": 3,            # Straight (sequence)
     "straight_flush": 4,      # Straight Flush
-    "straight": 3,            # Straight
-    "flush": 2,               # Flush
-    "pair": 1,                # Pair
-    "high_card": 0            # High Card (doesn't win HIGH side bet)
+    "three_of_a_kind": 5,     # Three of a Kind (highest)
 }
 
-# LOW side bet conditions
-LOW_HAND_CONDITIONS = {
-    "5_top": 5,    # All cards ≤ 5
-    "6_top": 6,    # All cards ≤ 6
-    "7_top": 7,    # All cards ≤ 7
-    "8_top": 8,    # All cards ≤ 8
-    "9_top": 9,    # All cards ≤ 9
-    "10_top": 10   # All cards ≤ 10
+# HIGH side bet payouts (typical casino payouts)
+HIGH_PAYOUTS = {
+    "three_of_a_kind": 5,     
+    "straight_flush": 4,       
+    "straight": 3,            
+    "flush": 2,            
+    "pair": 1,             
+    "high_card": 0         
+}
+
+# LOW side bet payouts (typical casino payouts)
+LOW_PAYOUTS = {
+    "5_top": 5,    
+    "6_top": 4,      
+    "7_top": 3,    
+    "8_top": 2,    
+    "9_top": 1,    
+    "10_top": 0    
 }
 
 def save_state():
@@ -86,11 +96,11 @@ def create_deck():
     """Creates and shuffles 6 standard decks for Mini Flush."""
     ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K"]
     suits = ["S", "D", "C", "H"]
-    full_deck = [rank + suit for rank in ranks for suit in suits]
+    single_deck = [rank + suit for rank in ranks for suit in suits]
     # Use 6 decks as specified in the game rules
     
-    random.shuffle(full_deck)
-    return full_deck
+    random.shuffle(single_deck)
+    return single_deck
 
 def get_card_value(card):
     """Gets numeric value of card for comparison."""
@@ -113,7 +123,7 @@ def get_card_suit(card):
     return card[-1]
 
 def evaluate_high_hand(hand):
-    """Evaluates hand for HIGH side bet."""
+    """Evaluates hand for HIGH side bet - returns (combination_type, tiebreaker_value)."""
     if len(hand) != 3:
         return ("high_card", 0)
     
@@ -125,26 +135,32 @@ def evaluate_high_hand(hand):
     if values[0] == values[1] == values[2]:
         return ("three_of_a_kind", values[0])
     
-    # Check for sequences
-    is_sequence = (values[0] - values[1] == 1 and values[1] - values[2] == 1)
-    
-    # Special case for A-2-3 sequence (lowest straight)
-    if sorted(values) == [2, 3, 14]:
-        is_sequence = True
-        sequence_high = 3  # A-2-3 is treated as 3-high sequence
-    else:
-        sequence_high = values[0] if is_sequence else 0
-    
-    # Check for flush
+    # Check if all same suit (flush)
     is_flush = suits[0] == suits[1] == suits[2]
     
-    # Straight Flush
-    if is_sequence and is_flush:
-        return ("straight_flush", sequence_high)
+    # Check for straight (sequence)
+    is_straight = False
+    straight_high = 0
     
-    # Straight
-    if is_sequence:
-        return ("straight", sequence_high)
+    # Regular straights
+    if values[0] - values[1] == 1 and values[1] - values[2] == 1:
+        is_straight = True
+        straight_high = values[0]
+    
+    # Special case: A-2-3 straight (Ace low)
+    elif sorted(values) == [2, 3, 14]:
+        is_straight = True
+        straight_high = 3  # A-2-3 is 3-high straight
+    
+    # Straight Flush
+    if is_straight and is_flush:
+        return ("straight_flush", straight_high)
+    
+    # Three of a Kind (already checked above)
+    
+    # Straight  
+    if is_straight:
+        return ("straight", straight_high)
     
     # Flush
     if is_flush:
@@ -152,26 +168,24 @@ def evaluate_high_hand(hand):
     
     # Pair
     if values[0] == values[1]:
-        return ("pair", values[0] * 100 + values[2])  # pair of values[0], kicker values[2]
+        return ("pair", values[0] * 100 + values[2])  # pair value * 100 + kicker
     elif values[1] == values[2]:
-        return ("pair", values[1] * 100 + values[0])  # pair of values[1], kicker values[0]
+        return ("pair", values[1] * 100 + values[0])  # pair value * 100 + kicker
     
-    # High Card (doesn't win HIGH side bet)
-    return ("high_card", values[0] * 10000 + values[1] * 100 + values[2])
+    # High Card
+    # return ("high_card", values[0] * 10000 + values[1] * 100 + values[2])
 
 def evaluate_low_hand(hand):
-    """Evaluates a hand for LOW side bet conditions. Ace is always high (14)."""
-    # First check if it's a high hand
-    high_combo, _ = evaluate_high_hand(hand)
-    if high_combo != "high_card":
-        return None  # Not a low hand if it has a high combination
+    """Evaluates hand for LOW side bet - returns winning condition or None."""
+    if len(hand) != 3:
+        return None
     
-    # Convert cards to numeric values, treating Ace as 14 (high)
+    # Get card values (Ace is always HIGH = 14 for low bet evaluation)
     values = []
     for card in hand:
         rank = card[0]
         if rank == 'A':
-            values.append(14)  # Ace is always high for low hand
+            values.append(14)  # Ace is always high
         elif rank == 'T':
             values.append(10)
         elif rank == 'J':
@@ -183,63 +197,64 @@ def evaluate_low_hand(hand):
         else:
             values.append(int(rank))
     
-    # Check if all cards are ≤ 10 (Ace will be 14, so will not qualify)
-    if all(v <= 10 for v in values):
-        highest_card = max(values)
-        if highest_card <= 5:
-            return "5_top"
-        elif highest_card <= 6:
-            return "6_top"
-        elif highest_card <= 7:
-            return "7_top"
-        elif highest_card <= 8:
-            return "8_top"
-        elif highest_card <= 9:
-            return "9_top"
-        elif highest_card == 10:
-            return "10_top"  # This will be treated as a push
+    # Find the highest card value
+    highest_card = max(values)
     
-    return "no_combination"  # Return this when no low condition is met
+    # Check low conditions (must be NO pair, NO flush, NO straight)
+    high_combo, _ = evaluate_high_hand(hand)
+    if high_combo != "high_card":
+        return None  # Has a combination, so doesn't qualify for low bet
+    
+    # Check low conditions based on highest card
+    if highest_card <= 5:
+        return "5_top"
+    elif highest_card <= 6:
+        return "6_top"
+    elif highest_card <= 7:
+        return "7_top"
+    elif highest_card <= 8:
+        return "8_top"
+    elif highest_card <= 9:
+        return "9_top"
+    elif highest_card <= 10:
+        return "10_top"
+    
+    return None  # Doesn't qualify for low bet
 
 def dealer_qualifies(dealer_hand):
-    """Checks if dealer qualifies for ANTE bet."""
+    """Checks if dealer qualifies for ANTE/MAIN bet (needs Queen high or better)."""
     if len(dealer_hand) != 3:
         return False
     
-    # Get dealer's hand combination
-    dealer_combo, _ = evaluate_high_hand(dealer_hand)
+    dealer_combo, dealer_value = evaluate_high_hand(dealer_hand)
     
-    # If dealer has any of these combinations, they automatically qualify
-    if dealer_combo in ["three_of_a_kind", "straight_flush", "straight", "flush", "pair"]:
+    # Any combination other than high card automatically qualifies
+    if dealer_combo != "high_card":
         return True
     
-    # If dealer only has high_card, check if it's Queen-high or better
-    if dealer_combo == "high_card":
-        values = [get_card_value(card) for card in dealer_hand]
-        highest_card = max(values)
-        # Queen = 12, so dealer needs 12 or higher for high card
-        return highest_card >= 12
-    
-    return False
+    # For high card, need Queen (12) or better as highest card
+    values = [get_card_value(card) for card in dealer_hand]
+    highest_card = max(values)
+    return highest_card >= 12  # Queen = 12
 
-def compare_hands_ante(player_hand, dealer_hand):
-    """Compares player hand vs dealer hand for ANTE bet."""
+def compare_hands_main_bet(player_hand, dealer_hand):
+    """Compares hands for MAIN/ANTE bet."""
     # First check if dealer qualifies
     if not dealer_qualifies(dealer_hand):
         return "dealer_no_qualify"
     
-    player_rank, player_value = evaluate_high_hand(player_hand)
-    dealer_rank, dealer_value = evaluate_high_hand(dealer_hand)
+    player_combo, player_value = evaluate_high_hand(player_hand)
+    dealer_combo, dealer_value = evaluate_high_hand(dealer_hand)
     
-    player_score = HIGH_HAND_RANKINGS[player_rank]
-    dealer_score = HIGH_HAND_RANKINGS[dealer_rank]
+    player_rank = HIGH_HAND_RANKINGS[player_combo]
+    dealer_rank = HIGH_HAND_RANKINGS[dealer_combo]
     
-    if player_score > dealer_score:
+    if player_rank > dealer_rank:
         return "player_wins"
-    elif player_score < dealer_score:
+    elif player_rank < dealer_rank:
         return "dealer_wins"
     else:
-        # Same rank, compare values
+        # Same combination type, compare values
         if player_value > dealer_value:
             return "player_wins"
         elif player_value < dealer_value:
@@ -321,37 +336,57 @@ async def handle_shuffle_deck():
     save_state()
     
     game_state["deck"] = create_deck()
-    game_state["burned_cards"] = []
+   
     
     await broadcast({
         "action": "deck_shuffled",
         "deck_size": len(game_state["deck"]),
-        "burned_cards": len(game_state["burned_cards"])
+        
     })
+
+# async def handle_burn_card():
+#     """Burns the top card from the deck."""
+#     global game_state
+    
+#     if not game_state["deck"]:
+#         await broadcast({"action": "error", "message": "No cards in deck to burn"})
+#         return
+    
+#     # Save state before making changes
+#     save_state()
+    
+#     burned_card = game_state["deck"].pop(0)
+#     game_state["burned_cards"].append(burned_card)
+    
+#     await broadcast({
+#         "action": "card_burned",
+#         "burned_card": burned_card,
+#         "deck_size": len(game_state["deck"]),
+#         "burned_cards": len(game_state["burned_cards"])
+#     })
 
 async def handle_deal_cards():
     """Deals 3 cards to each active player and dealer."""
     global game_state
     
-    if len(game_state["deck"]) < 52:
-        await broadcast({"action": "error", "message": "Not enough cards in deck"})
-        return
-    
-    # Save state before making changes
+    # Count active players
+    active_players = sum(1 for player in game_state["players"].values() if player["active"])
+  
     save_state()
     
-    # Reset hands
+    # Reset hands and player states
     game_state["dealer_hand"] = []
     for player in game_state["players"].values():
         player["hand"] = []
         player["result"] = None
-        player["has_acted"] = False # Initialize has_acted for each player
-        # Clear all combination types if they exist
-        for key in ["high_combination", "low_combination", "ante_result"]:
+        player["has_acted"] = False
+        player["action_type"] = None
+        # Clear previous round data
+        for key in ["main_bet_result", "high_bet_result", "low_bet_result", "high_combination", "low_combination"]:
             if key in player:
                 del player[key]
     
-    # Clear dealer combinations if they exist
+    # Clear dealer data
     for key in ["dealer_combination", "dealer_qualifies"]:
         if key in game_state:
             del game_state[key]
@@ -445,13 +480,16 @@ async def handle_remove_player(player_id):
     save_state()
     
     if player_id in game_state["players"]:
-        game_state["players"][player_id]["active"] = False
-        game_state["players"][player_id]["hand"] = []
-        game_state["players"][player_id]["result"] = None
-        # Clear all combination types
-        for key in ["high_combination", "low_combination", "ante_result"]:
-            if key in game_state["players"][player_id]:
-                del game_state["players"][player_id][key]
+        player = game_state["players"][player_id]
+        player["active"] = False
+        player["hand"] = []
+        player["result"] = None
+        player["has_acted"] = False
+        player["action_type"] = None
+        # Clear all bet results and combinations
+        for key in ["main_bet_result", "high_bet_result", "low_bet_result", "high_combination", "low_combination"]:
+            if key in player:
+                del player[key]
         
         await broadcast({
             "action": "player_removed",
@@ -470,13 +508,14 @@ async def handle_reset_table():
     for player in game_state["players"].values():
         player["hand"] = []
         player["result"] = None
-        player["has_acted"] = False # Initialize has_acted for each player
-        # Clear all combination types
-        for key in ["high_combination", "low_combination", "ante_result"]:
+        player["has_acted"] = False
+        player["action_type"] = None
+        # Clear all bet results and combinations
+        for key in ["main_bet_result", "high_bet_result", "low_bet_result", "high_combination", "low_combination"]:
             if key in player:
                 del player[key]
     
-    # Clear dealer combinations
+    # Clear dealer data
     for key in ["dealer_combination", "dealer_qualifies"]:
         if key in game_state:
             del game_state[key]
@@ -527,7 +566,7 @@ async def handle_undo_last():
     })
 
 async def handle_reveal_hands():
-    """Reveals all hands and calculates winners for all bet types."""
+    """Reveals all hands and calculates results for all bet types."""
     global game_state
     
     # Save state before making changes
@@ -537,48 +576,68 @@ async def handle_reveal_hands():
     game_state["winners"] = []
     
     # Evaluate dealer's hand
-    dealer_high_combo, _ = evaluate_high_hand(game_state["dealer_hand"])
-    game_state["dealer_combination"] = dealer_high_combo
+    dealer_combo, dealer_value = evaluate_high_hand(game_state["dealer_hand"])
+    game_state["dealer_combination"] = dealer_combo
     game_state["dealer_qualifies"] = dealer_qualifies(game_state["dealer_hand"])
     
     # Evaluate each active player
     for player_id, player in game_state["players"].items():
-        if player["active"] and len(player["hand"]) == 3:
-            # HIGH side bet evaluation
-            player_high_combo, _ = evaluate_high_hand(player["hand"])
-            player["combination"] = player_high_combo
+        if not player["active"] or len(player["hand"]) != 3:
+            continue
             
-            # LOW side bet evaluation
-            low_combo = evaluate_low_hand(player["hand"])
-            if low_combo and low_combo != "no_combination":
-                if low_combo == "10_top":
-                    player["result"] = "push"  # Special case for 10 top
-                else:
-                    # If it's a low hand, show the low combination instead of high card
-                    player["combination"] = low_combo
-            elif low_combo == "no_combination":
-                # If no low combination and no high combination, player loses
-                player["result"] = "lose"
-                player["combination"] = "high_card"  # Show as high card but it's a losing hand
+        # Evaluate HIGH side bet
+        high_combo, high_value = evaluate_high_hand(player["hand"])
+        player["high_combination"] = high_combo
+        
+        if HIGH_PAYOUTS[high_combo] > 0:
+            player["high_bet_result"] = "win"
+            player["high_payout"] = HIGH_PAYOUTS[high_combo]
+        else:
+            player["high_bet_result"] = "lose"
+            player["high_payout"] = 0
+        
+        # Evaluate LOW side bet
+        low_combo = evaluate_low_hand(player["hand"])
+        player["low_combination"] = low_combo if low_combo else "no_qualify"
+        
+        if low_combo:
+            if LOW_PAYOUTS[low_combo] > 0:
+                player["low_bet_result"] = "win"
+                player["low_payout"] = LOW_PAYOUTS[low_combo]
+            else:  # 10_top is push
+                player["low_bet_result"] = "push"
+                player["low_payout"] = 0
+        else:
+            player["low_bet_result"] = "lose"
+            player["low_payout"] = 0
+        
+        # Evaluate MAIN bet (only if player didn't surrender)
+        if player.get("action_type") == "surrender":
+            player["main_bet_result"] = "surrender"
+            player["main_payout"] = -1  # Lose main bet
+        else:
+            main_result = compare_hands_main_bet(player["hand"], game_state["dealer_hand"])
+            player["main_bet_result"] = main_result
             
-            # ANTE bet evaluation
-            ante_result = compare_hands_ante(player["hand"], game_state["dealer_hand"])
-            player["ante_result"] = ante_result
-            
-            # Determine overall result
-            if player["result"] == "push":  # Keep push result for 10 top
-                pass
-            elif player["result"] == "lose":  # Keep lose result for no combinations
-                pass
-            elif ante_result == "player_wins":
-                player["result"] = "win"
+            if main_result == "player_wins":
+                player["main_payout"] = 1  # 1:1 payout
                 game_state["winners"].append(player_id)
-            elif ante_result == "dealer_no_qualify":
-                player["result"] = "ante"
-            elif ante_result == "tie":
-                player["result"] = "tie"
-            else:
-                player["result"] = "lose"
+            elif main_result == "dealer_no_qualify":
+                player["main_payout"] = 0  # Push - ante gets pushed
+            elif main_result == "tie":
+                player["main_payout"] = 0  # Push
+            else:  # dealer_wins
+                player["main_payout"] = -1  # Lose main bet
+        
+        # Set overall result for display (prioritize main bet result)
+        if player["main_bet_result"] == "player_wins":
+            player["result"] = "win"
+        elif player["main_bet_result"] in ["dealer_no_qualify", "tie"]:
+            player["result"] = "ante"
+        elif player["main_bet_result"] == "surrender":
+            player["result"] = "surrender"  
+        else:
+            player["result"] = "lose"
     
     # Record wins in database
     if game_state["winners"]:
@@ -658,7 +717,7 @@ async def start_automatic():
     await handle_deal_cards()
     await asyncio.sleep(2)
     
-    # Step 3: Reveal hands
+    # Step 3: Reveal hands (commented out for manual control)
     # await handle_reveal_hands()
 
 async def start_manual():
@@ -705,9 +764,11 @@ async def handle_table_number(table_number):
     })
 
 async def handle_player_played(player_id):
+    """Handles when a player chooses to play (continue with main bet)."""
     global game_state
     if player_id and player_id in game_state["players"]:
         game_state["players"][player_id]["has_acted"] = True
+        game_state["players"][player_id]["action_type"] = "play"
         await broadcast({
             "action": "player_acted",
             "player_id": player_id,
@@ -716,9 +777,11 @@ async def handle_player_played(player_id):
         })
 
 async def handle_player_surrendered(player_id):
+    """Handles when a player surrenders (forfeit main bet, keep side bets)."""
     global game_state
     if player_id and player_id in game_state["players"]:
         game_state["players"][player_id]["has_acted"] = True
+        game_state["players"][player_id]["action_type"] = "surrender"
         await broadcast({
             "action": "player_acted",
             "player_id": player_id,

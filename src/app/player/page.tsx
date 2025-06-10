@@ -79,7 +79,7 @@ export default function PlayerView() {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-3xl mx-auto">
         <header className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">3 Patti Player View</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Mini Flush  Player View</h1>
           
           <div className="space-y-4">
             <div className={`text-sm font-medium ${isConnected ? 'text-green-600' : 'text-red-600'}`}>
