@@ -19,6 +19,9 @@ export default function PlayerView() {
   const activePlayers = Object.entries(gameState.players)
     .filter(([_, player]) => player.active)
     .map(([playerId]) => playerId);
+    
+  const waitingPlayers = activePlayers.filter(pid => !gameState.players[pid].has_acted);
+  const allPlayersActed = activePlayers.length > 0 && waitingPlayers.length === 0;
 
   const currentPlayer = selectedPlayer && gameState.players[selectedPlayer];
   
@@ -50,12 +53,12 @@ export default function PlayerView() {
     });
     setPlayerActions(initialPlayerActions);
 
+    const allPlayersActed = Object.values(gameState.players)
+      .filter(player => player.active)
+      .every(player => player.has_acted);
+
     // If all active players have played or surrendered, reveal dealer cards
-    const activePlayers = Object.entries(gameState.players)
-      .filter(([_, player]) => player.active)
-      .map(([playerId]) => playerId);
-    const allActed = activePlayers.every(pid => gameState.players[pid]?.has_acted);
-    if (activePlayers.length > 0 && allActed) {
+    if (activePlayers.length > 0 && allPlayersActed) {
       setShowDealerCards(true);
     } else {
       setShowDealerCards(false);
@@ -159,13 +162,18 @@ export default function PlayerView() {
                     result={null}
                     isDealer={true}
                     showCards={showDealerCards}
-                    combination={gameState.dealer_combination}
+                    highCombination={gameState.dealer_combination}
                     dealerQualifies={gameState.dealer_qualifies}
                   />
                 ) : (
                   <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-semibold text-gray-700">Dealer</h3>
+                      {!allPlayersActed && waitingPlayers.length > 0 && (
+                        <span className="text-sm text-yellow-600">
+                          Waiting for {waitingPlayers.length} player{waitingPlayers.length > 1 ? 's' : ''} to act
+                        </span>
+                      )}
                     </div>
                     <div className="flex justify-center space-x-2">
                       {[1, 2, 3].map((i) => (
@@ -186,7 +194,9 @@ export default function PlayerView() {
                   active={currentPlayer.active}
                   result={currentPlayer.result}
                   showCards={showCards}
-                  combination={currentPlayer.combination}
+                  highCombination={currentPlayer.high_combination}
+                  lowCombination={currentPlayer.low_combination}
+                  mainBetResult={currentPlayer.main_bet_result}
                 />
               </div>
 

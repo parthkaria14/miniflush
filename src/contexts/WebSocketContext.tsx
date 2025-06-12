@@ -171,6 +171,8 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             case 'update_game':
             case 'cards_dealt':
             case 'hands_revealed':
+            case 'player_acted':
+            case 'card_added':
               setPreviousGameState(gameState);
               setGameState(data.game_state);
               break;
@@ -200,8 +202,8 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             case 'error':
               addNotification(data.message, 'error');
               break;
-            case 'card_added':
-              addNotification(`Card added to ${data.target}`, 'success');
+            case 'notification':
+              addNotification(data.message, data.type || 'info');
               break;
             default:
               console.log('Unhandled message:', data);

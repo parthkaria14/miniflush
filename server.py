@@ -569,6 +569,21 @@ async def handle_reveal_hands():
     """Reveals all hands and calculates results for all bet types."""
     global game_state
     
+    # Validate that all active players have acted
+    active_players = [player for player in game_state["players"].values() if player["active"]]
+    if not active_players:
+        await broadcast({"action": "error", "message": "No active players in the game"})
+        return
+        
+    if not all(player["has_acted"] for player in active_players):
+        remaining_players = [pid for pid, player in game_state["players"].items() 
+                           if player["active"] and not player["has_acted"]]
+        await broadcast({
+            "action": "error", 
+            "message": f"Waiting for players to act: {', '.join(remaining_players)}"
+        })
+        return
+    
     # Save state before making changes
     save_state()
     

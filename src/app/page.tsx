@@ -16,9 +16,10 @@ export default function DealerView() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showDealerCards, setShowDealerCards] = useState(false);
 
-  // Count active players
-  const activePlayers = Object.values(gameState.players).filter(player => player.active).length;
-  const canAddPlayer = activePlayers < 6;
+  // Count active players and check if all have acted
+  const activePlayers = Object.values(gameState.players).filter(player => player.active);
+  const allPlayersActed = activePlayers.length > 0 && activePlayers.every(player => player.has_acted);
+  const canAddPlayer = activePlayers.length < 6;
 
   // Get list of inactive players
   const inactivePlayers = Object.entries(gameState.players)
@@ -122,20 +123,13 @@ export default function DealerView() {
   }, []);
 
   useEffect(() => {
-    const allPlayersActed = Object.values(gameState.players)
-      .filter(player => player.active)
-      .every(player => player.has_acted);
-
-    // Dealer's cards are shown if all players have acted AND the game is in the 'dealing' phase,
-    // or if the game is in the 'revealed' or 'betting' phase (which implies cards should be visible).
-    if (allPlayersActed && gameState.game_phase === 'dealing') {
-      setShowDealerCards(true);
-    } else if (gameState.game_phase === 'revealed' || gameState.game_phase === 'betting') {
+    // Only show dealer cards when the game phase is 'revealed'
+    if (gameState.game_phase === 'revealed') {
       setShowDealerCards(true);
     } else {
       setShowDealerCards(false);
     }
-  }, [gameState.players, gameState.game_phase]);
+  }, [gameState.game_phase]);
 
   // Clear error message after 3 seconds
   useEffect(() => {
@@ -215,10 +209,11 @@ export default function DealerView() {
             </div>
             <button
               onClick={handleRevealHands}
-              className={`px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors duration-200 ${!isConnected && 'opacity-50 cursor-not-allowed'}`}
-              disabled={!isConnected || isLoading}
+              className={`px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors duration-200 
+                ${(!isConnected || isLoading || !allPlayersActed || gameState.game_phase !== 'dealing') && 'opacity-50 cursor-not-allowed'}`}
+              disabled={!isConnected || isLoading || !allPlayersActed || gameState.game_phase !== 'dealing'}
             >
-              Reveal Hands
+              Reveal Hands {!allPlayersActed && activePlayers.length > 0 && `(${activePlayers.filter(p => !p.has_acted).length} players remaining)`}
             </button>
             <button
               onClick={handleUndo}
@@ -272,8 +267,6 @@ export default function DealerView() {
               showCards={showDealerCards}
               onAddCard={isManualMode ? handleAddCard : undefined}
               highCombination={gameState.dealer_combination}
-              lowCombination={gameState.dealer_low_combination}
-              mainBetResult={gameState.dealer_main_bet_result}
               dealerQualifies={gameState.dealer_qualifies}
               selectingCardFor={null}
             />
