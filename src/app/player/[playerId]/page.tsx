@@ -185,24 +185,22 @@ export default function PlayerView() {
           <div className="mb-8">
             <div className="flex justify-between items-center mb-2">
               <h2 className="text-xl font-bold">Your Hand</h2>
-              {!hasCurrentPlayerActed && !hasCurrentPlayerSurrendered && (
-                <div className="flex flex-col items-end gap-2">
-                  <div className="text-sm text-gray-600">
-                    Status: {isCurrentPlayerActive ? 'Active' : 'Inactive'} | 
-                    {hasCurrentPlayerActed ? ' Acted' : ' Not Acted'} | 
-                    {hasCurrentPlayerSurrendered ? ' Surrendered' : ' Not Surrendered'}
-                  </div>
-                  <button
-                    onClick={() => setShowPlayerCards(!showPlayerCards)}
-                    className={`px-4 py-2 rounded transition-colors duration-200 
-                      ${showPlayerCards ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} 
-                      text-white ${(!isConnected || !isCurrentPlayerActive) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    disabled={!isConnected || !isCurrentPlayerActive}
-                  >
-                    {showPlayerCards ? 'Hide Cards' : 'Show Cards'}
-                  </button>
+              <div className="flex flex-col items-end gap-2">
+                <div className="text-sm text-gray-600">
+                  Status: {isCurrentPlayerActive ? 'Active' : 'Inactive'} | 
+                  {hasCurrentPlayerActed ? ' Acted' : ' Not Acted'} | 
+                  {hasCurrentPlayerSurrendered ? ' Surrendered' : ' Not Surrendered'}
                 </div>
-              )}
+                <button
+                  onClick={() => setShowPlayerCards(!showPlayerCards)}
+                  className={`px-4 py-2 rounded transition-colors duration-200 
+                    ${showPlayerCards ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} 
+                    text-white ${(!isConnected || !isCurrentPlayerActive) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={!isConnected || !isCurrentPlayerActive}
+                >
+                  {showPlayerCards ? 'Hide Cards' : 'Show Cards'}
+                </button>
+              </div>
             </div>
             <PlayerHand
               playerId={currentPlayerId || ''}
