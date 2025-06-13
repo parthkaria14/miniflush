@@ -210,8 +210,8 @@ export default function DealerView() {
             <button
               onClick={handleRevealHands}
               className={`px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors duration-200 
-                ${(!isConnected || isLoading || !allPlayersActed || gameState.game_phase !== 'dealing') && 'opacity-50 cursor-not-allowed'}`}
-              disabled={!isConnected || isLoading || !allPlayersActed || gameState.game_phase !== 'dealing'}
+                ${(!isConnected || isLoading || !allPlayersActed) && 'opacity-50 cursor-not-allowed'}`}
+              disabled={!isConnected || isLoading || !allPlayersActed}
             >
               Reveal Hands {!allPlayersActed && activePlayers.length > 0 && `(${activePlayers.filter(p => !p.has_acted).length} players remaining)`}
             </button>

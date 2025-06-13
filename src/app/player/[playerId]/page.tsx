@@ -123,6 +123,22 @@ export default function PlayerView() {
   const hasCurrentPlayerActed = currentPlayer?.has_acted ?? false;
   const hasCurrentPlayerSurrendered = currentPlayer?.action_type === 'surrender';
 
+  // Debug logging for player states
+  useEffect(() => {
+    if (currentPlayerId) {
+      console.log('Player Debug Info:', {
+        playerId: currentPlayerId,
+        isConnected,
+        isCurrentPlayerActive,
+        hasCurrentPlayerActed,
+        hasCurrentPlayerSurrendered,
+        gamePhase: gameState?.game_phase,
+        playerState: currentPlayer,
+        allPlayers: gameState?.players
+      });
+    }
+  }, [currentPlayerId, isConnected, isCurrentPlayerActive, hasCurrentPlayerActed, hasCurrentPlayerSurrendered, gameState]);
+
   // Get active players who haven't acted yet
   const waitingPlayers = Object.entries(gameState.players)
     .filter(([_, player]) => (player as Player).active && !(player as Player).has_acted && (player as Player).action_type !== 'surrender')
@@ -143,7 +159,9 @@ export default function PlayerView() {
         {/* Game Phase */}
         <div className="mb-4 text-center">
           <span className="inline-block px-4 py-2 bg-blue-100 text-blue-800 rounded-lg">
-            {gameState.game_phase.charAt(0).toUpperCase() + gameState.game_phase.slice(1)}
+            {gameState?.game_phase ? 
+              gameState.game_phase.charAt(0).toUpperCase() + gameState.game_phase.slice(1) : 
+              'Waiting for game state...'}
           </span>
         </div>
 
@@ -168,15 +186,22 @@ export default function PlayerView() {
             <div className="flex justify-between items-center mb-2">
               <h2 className="text-xl font-bold">Your Hand</h2>
               {!hasCurrentPlayerActed && !hasCurrentPlayerSurrendered && (
-                <button
-                  onClick={() => setShowPlayerCards(!showPlayerCards)}
-                  className={`px-4 py-2 rounded transition-colors duration-200 
-                    ${showPlayerCards ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} 
-                    text-white ${!isConnected && 'opacity-50 cursor-not-allowed'}`}
-                  disabled={!isConnected || !isCurrentPlayerActive || gameState.game_phase === 'waiting'}
-                >
-                  {showPlayerCards ? 'Hide Cards' : 'Show Cards'}
-                </button>
+                <div className="flex flex-col items-end gap-2">
+                  <div className="text-sm text-gray-600">
+                    Status: {isCurrentPlayerActive ? 'Active' : 'Inactive'} | 
+                    {hasCurrentPlayerActed ? ' Acted' : ' Not Acted'} | 
+                    {hasCurrentPlayerSurrendered ? ' Surrendered' : ' Not Surrendered'}
+                  </div>
+                  <button
+                    onClick={() => setShowPlayerCards(!showPlayerCards)}
+                    className={`px-4 py-2 rounded transition-colors duration-200 
+                      ${showPlayerCards ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} 
+                      text-white ${(!isConnected || !isCurrentPlayerActive) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={!isConnected || !isCurrentPlayerActive}
+                  >
+                    {showPlayerCards ? 'Hide Cards' : 'Show Cards'}
+                  </button>
+                </div>
               )}
             </div>
             <PlayerHand
@@ -207,14 +232,16 @@ export default function PlayerView() {
           <div className="flex justify-center gap-4 mb-8">
             <button
               onClick={handlePlay}
-              className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+              className={`px-6 py-2 bg-green-500 text-white rounded-lg transition-colors
+                ${isCurrentPlayerActive ? 'hover:bg-green-600' : 'opacity-50 cursor-not-allowed'}`}
               disabled={!isCurrentPlayerActive}
             >
               Play
             </button>
             <button
               onClick={handleSurrender}
-              className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              className={`px-6 py-2 bg-red-500 text-white rounded-lg transition-colors
+                ${isCurrentPlayerActive ? 'hover:bg-red-600' : 'opacity-50 cursor-not-allowed'}`}
               disabled={!isCurrentPlayerActive}
             >
               Surrender
