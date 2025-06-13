@@ -15,16 +15,75 @@ export default function DealerView() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showDealerCards, setShowDealerCards] = useState(false);
+  const [nextPlayerToDeal, setNextPlayerToDeal] = useState<string | null>(null);
+  const [showCardDealingBox, setShowCardDealingBox] = useState(true);
 
   // Count active players and check if all have acted
-  const activePlayers = Object.values(gameState.players).filter(player => player.active);
-  const allPlayersActed = activePlayers.length > 0 && activePlayers.every(player => player.has_acted);
+  const activePlayers = Object.entries(gameState.players)
+    .filter(([_, player]) => player.active)
+    .map(([id]) => id);
+  const allPlayersActed = activePlayers.length > 0 && activePlayers.every(player => gameState.players[player].has_acted);
   const canAddPlayer = activePlayers.length < 6;
 
   // Get list of inactive players
   const inactivePlayers = Object.entries(gameState.players)
     .filter(([_, player]) => !player.active)
     .map(([id]) => id);
+
+  // Update next player to deal when game state changes
+  useEffect(() => {
+    if (!isManualMode) return;
+
+    // Get all active players including dealer
+    const allActivePlayers = [...activePlayers, 'dealer'];
+    
+    // Find the current player's index
+    const currentIndex = nextPlayerToDeal ? allActivePlayers.indexOf(nextPlayerToDeal) : -1;
+    
+    // If no current player or current player has 3 cards, move to next
+    if (currentIndex === -1 || 
+        (nextPlayerToDeal === 'dealer' ? 
+          gameState.dealer_hand.length >= 3 : 
+          gameState.players[nextPlayerToDeal].hand.length >= 3)) {
+      // Find the first player with less than 3 cards
+      const nextPlayer = allActivePlayers.find(playerId => 
+        playerId === 'dealer' ? 
+          gameState.dealer_hand.length === 0 : // Only move to dealer when all players have 3 cards
+          gameState.players[playerId].hand.length === 0 // Only move to next player when current has 3 cards
+      );
+      setNextPlayerToDeal(nextPlayer || null);
+    }
+  }, [gameState, isManualMode, activePlayers, nextPlayerToDeal]);
+
+  const handleGeneralAddCard = (card: string) => {
+    if (!nextPlayerToDeal) return;
+    
+    sendMessage({
+      action: 'add_card',
+      card,
+      target: nextPlayerToDeal
+    });
+
+    // After adding card, check if current player has 3 cards
+    const currentPlayerCards = nextPlayerToDeal === 'dealer' ? 
+      gameState.dealer_hand.length + 1 : // +1 because we just added a card
+      gameState.players[nextPlayerToDeal].hand.length + 1;
+
+    // If current player has 3 cards, find next player
+    if (currentPlayerCards >= 3) {
+      const allActivePlayers = [...activePlayers, 'dealer'];
+      const currentIndex = allActivePlayers.indexOf(nextPlayerToDeal);
+      
+      // Find next player who has no cards
+      const nextPlayer = allActivePlayers.find((playerId, index) => 
+        index > currentIndex && 
+        (playerId === 'dealer' ? 
+          gameState.dealer_hand.length === 0 : 
+          gameState.players[playerId].hand.length === 0)
+      );
+      setNextPlayerToDeal(nextPlayer || null);
+    }
+  };
 
   const handleModeChange = async (mode: 'automatic' | 'manual') => {
     if (!isConnected) return;
@@ -268,7 +327,9 @@ export default function DealerView() {
               onAddCard={isManualMode ? handleAddCard : undefined}
               highCombination={gameState.dealer_combination}
               dealerQualifies={gameState.dealer_qualifies}
-              selectingCardFor={null}
+              selectingCardFor={selectedPlayer}
+              isNextToDeal={nextPlayerToDeal === 'dealer'}
+              cardsDealt={gameState.dealer_hand.length}
             />
           </div>
 
@@ -286,6 +347,8 @@ export default function DealerView() {
                   lowCombination={player.low_combination}
                   mainBetResult={player.main_bet_result}
                   selectingCardFor={selectedPlayer}
+                  isNextToDeal={nextPlayerToDeal === playerId}
+                  cardsDealt={player.hand.length}
                 />
                 {player.active && (
                   <button
@@ -299,9 +362,52 @@ export default function DealerView() {
             ))}
           </div>
 
-          {isManualMode && selectedPlayer && (
+          {isManualMode && showCardDealingBox && (
             <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-4">
-              <CardSelector onCardSelect={handleCardSelect} />
+              <div className="max-w-7xl mx-auto relative">
+                <button
+                  onClick={() => setShowCardDealingBox(false)}
+                  className="absolute top-0 right-0 text-gray-500 hover:text-gray-700 p-2"
+                  title="Close card dealing box"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+                <div className="flex justify-between items-center mb-2">
+                  <div className="text-sm text-gray-600">
+                    {nextPlayerToDeal ? 
+                      `Dealing to ${nextPlayerToDeal === 'dealer' ? 'Dealer' : nextPlayerToDeal} (${nextPlayerToDeal === 'dealer' ? gameState.dealer_hand.length : gameState.players[nextPlayerToDeal].hand.length}/3 cards)` : 
+                      'All players have 3 cards'}
+                  </div>
+                  {selectedPlayer && (
+                    <button
+                      onClick={() => setSelectedPlayer(null)}
+                      className="text-sm text-blue-500 hover:text-blue-700"
+                    >
+                      Cancel Player Selection
+                    </button>
+                  )}
+                </div>
+                <CardSelector 
+                  onCardSelect={selectedPlayer ? handleCardSelect : handleGeneralAddCard} 
+                />
+              </div>
+            </div>
+          )}
+
+          {isManualMode && !showCardDealingBox && (
+            <div className="fixed bottom-4 right-4">
+              <button
+                onClick={() => setShowCardDealingBox(true)}
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full shadow-lg flex items-center gap-2"
+                title="Open card dealing box"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Deal Cards
+              </button>
             </div>
           )}
         </main>

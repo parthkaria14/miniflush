@@ -14,6 +14,7 @@ interface PlayerHandProps {
   mainBetResult?: string;
   dealerQualifies?: boolean;
   selectingCardFor?: string | null;
+  isNextToDeal?: boolean;
 }
 
 const PlayerHand: React.FC<PlayerHandProps> = ({
@@ -28,7 +29,8 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
   lowCombination,
   mainBetResult,
   dealerQualifies,
-  selectingCardFor
+  selectingCardFor,
+  isNextToDeal = false
 }) => {
   const getResultColor = () => {
     switch (result) {
@@ -54,12 +56,17 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
   };
 
   return (
-    <div className={`p-4 rounded-lg ${active ? 'bg-blue-50' : 'bg-gray-100'} ${isDealer ? 'border-2 border-primary' : ''}`}>
+    <div className={`p-4 rounded-lg ${active ? 'bg-blue-50' : 'bg-gray-100'} ${isDealer ? 'border-2 border-primary' : ''} ${isNextToDeal ? 'ring-2 ring-yellow-500 ring-opacity-50' : ''}`}>
       <div className="flex justify-between items-center mb-2">
         <div>
           <h3 className="text-lg font-semibold text-gray-800">
             {isDealer ? 'Dealer' : playerId}
-           </h3>
+            {isNextToDeal && (
+              <span className="ml-2 text-sm text-yellow-600 font-normal">
+                (Next to deal)
+              </span>
+            )}
+          </h3>
         </div>
         {result && (
           <span className={`font-bold ${getResultColor()}`}>
