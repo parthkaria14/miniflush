@@ -15,8 +15,7 @@ interface ControlPanelPopupProps {
 
 const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, onResetGame, onRevealHands, onDeleteLastGame, onUndolast, isLoading, onModeChange, children }) => {
   const [selectedMode, setSelectedMode] = useState<'automatic' | 'manual' | 'live'>('manual');
-  const { gameState, sendMessage, isConnected, notifications, removeNotification } = useWebSocket();
-  const [bet, setBet] = useState({ min: 10, max: 1000 });
+  const { gameState, sendMessage, isConnected, notifications, removeNotification, addNotification } = useWebSocket();
   const [isBetModalOpen, setIsBetModalOpen] = useState(false);
   const [tempBet, setTempBet] = useState({ min: 10, max: 1000 });
   const [selectedRank, setSelectedRank] = useState('');
@@ -54,12 +53,32 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
   }
 
   const handleOpenBetModal = () => {
-    setTempBet(bet);
+    setTempBet({ min: gameState.min_bet, max: gameState.max_bet });
     setIsBetModalOpen(true);
   };
 
   const handleSaveBet = () => {
-    setBet(tempBet);
+    if (tempBet.min >= tempBet.max) {
+      addNotification('Minimum bet must be less than maximum bet', 'error');
+      return;
+    }
+    if (tempBet.min < 0 || tempBet.max < 0) {
+      addNotification('Bet amounts cannot be negative', 'error');
+      return;
+    }
+    
+    console.log(gameState.max_bet);
+    console.log(gameState.min_bet);
+    
+    sendMessage({
+      action: 'update_game',
+      game_state: {
+        ...gameState,
+        min_bet: tempBet.min,
+        max_bet: tempBet.max
+      }
+    });
+    addNotification('Updating bet limits...', 'info');
     setIsBetModalOpen(false);
   };
 
@@ -215,14 +234,15 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
                     className="rounded-lg shadow text-3xl font-bold flex items-center justify-center"
                     style={{ width: 780, height: 98, backgroundColor: '#fff', color: '#741003' }}
                   >
-                    Max: {bet.max}
+                    Max: {gameState.max_bet}
                   </button>
                   <button
                     key="min-10"
                     className="rounded-lg shadow text-3xl font-bold flex items-center justify-center"
                     style={{ width: 780, height: 98, backgroundColor: '#fff', color: '#741003' }}
+                    onClick={() => {console.log(gameState.min_bet)}}
                   >
-                    Min: {bet.min}
+                    Min: {gameState.min_bet}
                   </button>
                   <button
                     key="change-bets"
@@ -236,6 +256,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
                     key="enter-table-number"
                     className="rounded-lg shadow text-3xl font-bold flex items-center justify-center"
                     style={{ width: 780, height: 98, backgroundColor: '#fff', color: '#741003' }}
+                    onClick={() => (console.log(gameState.table_number))}
                   >
                     Enter table number
                   </button>

@@ -15,6 +15,8 @@ interface PlayerHandProps {
   dealerQualifies?: boolean;
   selectingCardFor?: string | null;
   isNextToDeal?: boolean;
+  has_acted?: boolean;
+  action_type?: string;
 }
 
 const PlayerHand: React.FC<PlayerHandProps> = ({
@@ -30,7 +32,9 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
   mainBetResult,
   dealerQualifies,
   selectingCardFor,
-  isNextToDeal = false
+  isNextToDeal = false,
+  has_acted,
+  action_type
 }) => {
   const getResultColor = () => {
     if (!result) return 'text-gray-400';
@@ -51,23 +55,23 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
   };
 
   return (
-    <div className={`p-4 rounded-lg bg-[#A42210] h-[24vh] border-4 border-[#D6AB5D] border-dashed ${isDealer ? 'w-[61.5vw]' : 'w-[30vw]'} ${isNextToDeal ? 'ring-2 ring-yellow-500 ring-opacity-50' : ''} ${selectingCardFor === playerId ? 'animate-pulse shadow-[0_0_30px_#D6AB5D]' : ''}`} >
+    <div className={`p-4 rounded-lg bg-[#A42210] h-[24vh] border-4 border-[#D6AB5D] border-dashed ${isDealer ? 'w-[61.5vw]' : 'w-[30vw]'} ${isNextToDeal ? 'ring-4 ring-yellow-500 ring-opacity-100 shadow-[0_0_20px_#D6AB5D]' : ''}`} >
       <div className="flex justify-between items-center mb-2">
         <div>
-          <h3 className="text-5xl font-semibold text-white m-7">
+          <h3 className="text-5xl font-semibold text-white m-5">
             {isDealer ? 'Dealer' : playerId.replace(/(\d+)/, ' $1')}
-            {isNextToDeal && (
+            {/* {isNextToDeal && (
               <span className="ml-2 text-2xl text-yellow-400 font-normal">
                 (Next to deal)
               </span>
-            )}  
+            )}   */}
           </h3>
         </div>
-        {result && (
+        {/* {result && (
           <span className={`font-bold ${getResultColor()}`}>
-            {getResultText()}
+            {getResultText()} ig i can can put the text here if i need more space in the playerHand
           </span>
-        )}
+        )} */}
       </div>
       {isDealer && dealerQualifies === false && (
         <p className="text-2xl text-white mb-2 font-semibold ml-6">
@@ -91,15 +95,20 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
       
       {/* Side Bet - Show high combination if it qualifies (not high_card) */}
       {!isDealer && showCards && highCombination && highCombination !== 'high_card' && (
-        <p className="text-2xl text-gray-200 mb-4 ml-6">
+        <p className="text-2xl text-gray-200 mb-1 ml-6">
           Side Bet (High): {formatCombination(highCombination)}
         </p>
       )}
       
       {/* Side Bet - Show low combination if it exists and qualifies (not 'no_qualify') */}
       {!isDealer && showCards && lowCombination && lowCombination !== 'no_qualify' && (
-        <p className="text-2xl text-gray-200 mb-4 ml-6">
+        <p className="text-2xl text-gray-200 mb-1 ml-6">
           Side Bet (Low): {formatCombination(lowCombination)}
+        </p>
+      )}
+      {!isDealer && active && (
+        <p className="text-2xl text-gray-200 mb-1 ml-6">
+          Status: {has_acted ? (action_type === 'surrender' ? 'acted' : 'acted') : 'Waiting to act'}
         </p>
       )}
       

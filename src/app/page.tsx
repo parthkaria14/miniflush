@@ -345,6 +345,7 @@ export default function DealerView() {
           <div className="mb-8">
             {/* Dealer's Hand */}
             <PlayerHand
+              key="dealer"
               playerId="dealer"
               hand={gameState.dealer_hand}
               active={true}
@@ -356,6 +357,8 @@ export default function DealerView() {
               dealerQualifies={gameState.dealer_qualifies}
               selectingCardFor={selectedPlayer}
               isNextToDeal={nextPlayerToDeal === 'dealer'}
+              has_acted={false}
+              action_type={null}
             />
           </div>
 
@@ -375,6 +378,8 @@ export default function DealerView() {
                   mainBetResult={player.main_bet_result}
                   selectingCardFor={selectedPlayer}
                   isNextToDeal={nextPlayerToDeal === playerId}
+                  has_acted={player.has_acted}
+                  action_type={player.action_type}
                 />
               </div>
             ))}

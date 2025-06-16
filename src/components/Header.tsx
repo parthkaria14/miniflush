@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { useWebSocket } from '@/contexts/WebSocketContext';
 
 interface NavbarProps {
   onOpenControlPanel: () => void;
@@ -11,6 +12,8 @@ const Navbar: React.FC<NavbarProps> = ({
   onActivatePlayer,
   activePlayers = [] 
 }) => {
+  const { gameState } = useWebSocket();
+
   return (
     <nav className="relative h-[15vh] w-full overflow-hidden">
       <Image
@@ -23,15 +26,19 @@ const Navbar: React.FC<NavbarProps> = ({
       <div className="relative h-full px-4">
         <div className="flex items-center justify-between h-full -mt-4 px-8">
           {/* Left Logo */}
-          <div className="w-64 h-64 relative flex items-center justify-center">
+          <div className="w-64 h-64 relative flex flex-col items-center justify-center">
             <Image
-              src="/assets/mini_flush_table.png"
+              src="/assets/mini_flush.png"
               alt="Left Logo"
               width={240}
-              height={240}
+              height={240}  
               className="object-contain"
             />
+            <div className="text-white text-3xl mt-4">
+              Table: {gameState.table_number}
+            </div>
           </div>
+          
 
           {/* Center Hats */}
           <div className="flex items-center justify-center gap-8">
