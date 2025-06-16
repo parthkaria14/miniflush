@@ -6,44 +6,28 @@ interface CardProps {
 }
 
 const Card: React.FC<CardProps> = ({ card, hidden = false }) => {
-  const getSuitColor = (suit: string) => {
-    return suit === 'H' || suit === 'D' ? 'text-red-600' : 'text-gray-900';
-  };
-
-  const getSuitSymbol = (suit: string) => {
-    switch (suit) {
-      case 'H': return '♥';
-      case 'D': return '♦';
-      case 'C': return '♣';
-      case 'S': return '♠';
-      default: return suit;
-    }
-  };
-
   if (hidden) {
     return (
-      <div className="w-20 h-28 bg-blue-800 rounded-lg shadow-md flex items-center justify-center border-2 border-white cursor-pointer transform hover:scale-105 transition-transform">
-        <div className="text-white text-2xl font-bold">?</div>
+      <div className="w-40 h-56 rounded-lg shadow-md transform hover:scale-105 transition-transform">
+        <img 
+          src="/cards/card_back.png" 
+          alt="Card Back"
+          className="w-full h-full object-contain"
+        />
       </div>
     );
   }
 
-  const rank = card[0];
-  const suit = card[1];
-  const suitColor = getSuitColor(suit);
-  const suitSymbol = getSuitSymbol(suit);
+  // Convert card string to filename format (e.g., "9C" -> "9C.png")
+  const cardImage = `${card}.png`;
 
   return (
-    <div className="w-20 h-28 bg-white rounded-lg shadow-md flex flex-col items-center justify-between p-2 border border-gray-300 cursor-pointer transform hover:scale-105 transition-transform">
-      <div className={`text-lg font-bold ${suitColor} self-start`}>
-        {rank}
-      </div>
-      <div className={`text-3xl ${suitColor}`}>
-        {suitSymbol}
-      </div>
-      <div className={`text-lg font-bold ${suitColor} self-end transform rotate-180`}>
-        {rank}
-      </div>
+    <div className="w-40 h-56 rounded-lg shadow-md transform hover:scale-105 transition-transform">
+      <img 
+        src={`/cards/${cardImage}`} 
+        alt={`Card ${card}`}
+        className="w-full h-full object-contain"
+      />
     </div>
   );
 };

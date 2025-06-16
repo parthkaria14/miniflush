@@ -5,8 +5,6 @@ import { useWebSocket } from '@/contexts/WebSocketContext';
 import PlayerHand from '@/components/PlayerHand';
 import CardSelector from '@/components/CardSelector';
 import Notification from '@/components/Notification';
-import ControlPanelPopup from '@/components/ControlPanelPopup';
-import Navbar from '@/components/Header';
 
 export default function DealerView() {
   const { gameState, sendMessage, isConnected, notifications, removeNotification } = useWebSocket();
@@ -19,7 +17,6 @@ export default function DealerView() {
   const [showDealerCards, setShowDealerCards] = useState(false);
   const [nextPlayerToDeal, setNextPlayerToDeal] = useState<string | null>(null);
   const [showCardDealingBox, setShowCardDealingBox] = useState(true);
-  const [isControlPanelOpen, setIsControlPanelOpen] = useState(false);
 
   // Count active players and check if all have acted
   const activePlayers = Object.entries(gameState.players)
@@ -166,16 +163,6 @@ export default function DealerView() {
     setTimeout(() => setLastUndoneAction(null), 2000); // Clear message after 3 seconds
   };
 
-  const handleActivatePlayer = (playerId: string) => {
-    if (activePlayers.includes(playerId)) {
-      // If player is active, deactivate them
-      handleRemovePlayer(playerId);
-    } else {
-      // If player is inactive, activate them
-      sendMessage({ action: 'add_player', player: playerId });
-    }
-  };
-
   // Handle WebSocket messages
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -212,12 +199,7 @@ export default function DealerView() {
   }, [errorMessage]);
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#450A03' }}>
-      <Navbar 
-        onOpenControlPanel={() => setIsControlPanelOpen(true)} 
-        onActivatePlayer={handleActivatePlayer}
-        activePlayers={activePlayers}
-      />
+    <div className="min-h-screen bg-gray-50 p-8">
       {/* Display notifications */}
       {notifications.map(notification => (
         <Notification
@@ -228,20 +210,12 @@ export default function DealerView() {
         />
       ))}
 
-      <div className="m-12 poko p-8 bg-[#911606]" style={{ border: '10px solid #D6AB5D' }}>
-        {/* <header className="mb-8">
+      <div className="max-w-7xl mx-auto">
+        <header className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-3xl font-bold text-gray-900">Mini Flush Dealer View</h1>
-            <div className="flex items-center gap-4">
-              <div className={`text-sm font-medium ${isConnected ? 'text-green-600' : 'text-red-600'}`}> 
-                {isConnected ? '🟢 Connected to server' : '🔴 Disconnected from server'}
-              </div>
-              <button
-                onClick={() => setIsControlPanelOpen(true)}
-                className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900 transition-colors duration-200"
-              >
-                Open Control Panel
-              </button>
+            <div className={`text-sm font-medium ${isConnected ? 'text-green-600' : 'text-red-600'}`}>
+              {isConnected ? '🟢 Connected to server' : '🔴 Disconnected from server'}
             </div>
           </div>
           
@@ -339,11 +313,10 @@ export default function DealerView() {
               {errorMessage}
             </div>
           )}
-        </header> */}
+        </header>
 
         <main>
           <div className="mb-8">
-            {/* Dealer's Hand */}
             <PlayerHand
               playerId="dealer"
               hand={gameState.dealer_hand}
@@ -356,11 +329,11 @@ export default function DealerView() {
               dealerQualifies={gameState.dealer_qualifies}
               selectingCardFor={selectedPlayer}
               isNextToDeal={nextPlayerToDeal === 'dealer'}
+              cardsDealt={gameState.dealer_hand.length}
             />
           </div>
 
-          {/* Player Hands */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Object.entries(gameState.players).map(([playerId, player]) => (
               <div key={playerId} className="relative">
                 <PlayerHand
@@ -375,12 +348,21 @@ export default function DealerView() {
                   mainBetResult={player.main_bet_result}
                   selectingCardFor={selectedPlayer}
                   isNextToDeal={nextPlayerToDeal === playerId}
+                  cardsDealt={player.hand.length}
                 />
+                {player.active && (
+                  <button
+                    onClick={() => handleRemovePlayer(playerId)}
+                    className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                  >
+                    ×
+                  </button>
+                )}
               </div>
             ))}
           </div>
 
-          {/* {isManualMode && showCardDealingBox && (
+          {isManualMode && showCardDealingBox && (
             <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-4">
               <div className="max-w-7xl mx-auto relative">
                 <button
@@ -412,7 +394,7 @@ export default function DealerView() {
                 />
               </div>
             </div>
-          )} */}
+          )}
 
           {isManualMode && !showCardDealingBox && (
             <div className="fixed bottom-4 right-4">
@@ -430,7 +412,7 @@ export default function DealerView() {
           )}
         </main>
 
-        {/* <div className="fixed bottom-4 right-4">
+        <div className="fixed bottom-4 right-4">
           <a
             href="/player"
             target="_blank"
@@ -438,23 +420,7 @@ export default function DealerView() {
           >
             Open Player View
           </a>
-        </div> */}
-
-        {isControlPanelOpen && (
-          <ControlPanelPopup
-            open={isControlPanelOpen}
-            onClose={() => setIsControlPanelOpen(false)}
-            onResetGame={handleResetTable}
-            onRevealHands={handleRevealHands}
-            onDeleteLastGame={() => sendMessage({ action: 'delete_win' })}
-            onUndolast={handleUndo}
-            isLoading={isLoading}
-            onModeChange={handleModeChange}
-          >
-            <h2 className="text-xl font-bold mb-4">Control Panel</h2>
-            <p>This is a placeholder for your control panel content.</p>
-          </ControlPanelPopup>
-        )}
+        </div>
       </div>
     </div>
   );
