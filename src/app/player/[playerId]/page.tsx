@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useWebSocket } from '@/contexts/WebSocketContext';
 import PlayerHand from '@/components/PlayerHand';
 import Notification from '@/components/Notification';
+import Client_Navbar from '@/components/Client_NavBar';
 
 interface Player {
   hand: string[];
@@ -145,137 +146,143 @@ export default function PlayerView() {
     .map(([id]) => id);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Connection Status */}
-        <div className="mb-4">
-          <div className={`inline-block px-3 py-1 rounded-full text-sm ${
-            isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}>
-            {isConnected ? 'Connected' : 'Disconnected'}
+    <div className="min-h-screen bg-[#450A03] }">
+      <Client_Navbar/>
+      <div className="m-12 poko p-8 bg-[#911606] flex justify-center" style={{ border: '10px solid #D6AB5D' }}>
+        <div className="mx-auto">
+          {/* Connection Status */}
+          <div className="mb-4">
+            {/* <div className={`inline-block px-3 py-1 rounded-full text-sm ${
+              isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            }`}>
+              {isConnected ? 'Connected' : 'Disconnected'}
+            </div> */}
           </div>
-        </div>
 
-        {/* Game Phase */}
-        <div className="mb-4 text-center">
-          <span className="inline-block px-4 py-2 bg-blue-100 text-blue-800 rounded-lg">
-            {gameState?.game_phase ? 
-              gameState.game_phase.charAt(0).toUpperCase() + gameState.game_phase.slice(1) : 
-              'Waiting for game state...'}
-          </span>
-        </div>
+          {/* Game Phase */}
+          <div className="mb-4 text-center">
+            <span className="inline-block px-4 py-2 bg-[#741003] text-white text-2xl rounded-lg">
+              {gameState?.game_phase ? 
+                gameState.game_phase.charAt(0).toUpperCase() + gameState.game_phase.slice(1) : 
+                'Waiting for game state...'}
+            </span>
+          </div>
 
-        {/* Dealer's Hand */}
-        <div className="mb-8">
-          <h2 className="text-xl font-bold mb-2">Dealer's Hand</h2>
-          <PlayerHand
-            playerId="dealer"
-            hand={gameState.dealer_hand}
-            active={true}
-            result={null}
-            isDealer={true}
-            showCards={showDealerCards}
-            highCombination={showDealerCards ? gameState.dealer_combination : undefined}
-            dealerQualifies={gameState.dealer_qualifies}
-          />
-        </div>
-
-        {/* Current Player's Hand or Debug Message */}
-        {currentPlayer ? (
+          {/* Dealer's Hand */}
           <div className="mb-8">
-            <div className="flex justify-between items-center mb-2">
-              <h2 className="text-xl font-bold">Your Hand</h2>
-              <div className="flex flex-col items-end gap-2">
-                <div className="text-sm text-gray-600">
-                  Status: {isCurrentPlayerActive ? 'Active' : 'Inactive'} | 
-                  {hasCurrentPlayerActed ? ' Acted' : ' Not Acted'} | 
-                  {hasCurrentPlayerSurrendered ? ' Surrendered' : ' Not Surrendered'}
-                </div>
-                <button
-                  onClick={() => setShowPlayerCards(!showPlayerCards)}
-                  className={`px-4 py-2 rounded transition-colors duration-200 
-                    ${showPlayerCards ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} 
-                    text-white ${(!isConnected || !isCurrentPlayerActive) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  disabled={!isConnected || !isCurrentPlayerActive}
-                >
-                  {showPlayerCards ? 'Hide Cards' : 'Show Cards'}
-                </button>
-              </div>
-            </div>
+            {/* <h2 className="text-xl font-bold mb-2">Dealer's Hand</h2> */}
             <PlayerHand
-              playerId={currentPlayerId || ''}
-              hand={currentPlayer.hand}
-              active={isCurrentPlayerActive}
-              result={currentPlayer.result}
-              showCards={showPlayerCards || gameState.game_phase === 'revealed'}
-              highCombination={currentPlayer.high_combination}
-              lowCombination={currentPlayer.low_combination}
-              mainBetResult={currentPlayer.main_bet_result}
+              playerId="dealer"
+              hand={gameState.dealer_hand}
+              active={true}
+              result={null}
+              isDealer={true}
+              showCards={showDealerCards}
+              highCombination={showDealerCards ? gameState.dealer_combination : undefined}
+              dealerQualifies={gameState.dealer_qualifies}
             />
-            {!isCurrentPlayerActive && (
-              <div className="text-center text-red-600 mt-2">
-                You are not active in this game. (Player ID: {currentPlayerId})
-              </div>
-            )}
           </div>
-        ) : (
-          <div className="mb-8 text-center text-red-600">
-            Player not found. (Player ID: {currentPlayerId})<br />
-            Please check the URL or ask the dealer to activate your player.
-          </div>
-        )}
 
-        {/* Player Actions */}
-        {currentPlayer && !hasCurrentPlayerActed && !hasCurrentPlayerSurrendered && showPlayerCards && (
-          <div className="flex justify-center gap-4 mb-8">
-            <button
-              onClick={handlePlay}
-              className={`px-6 py-2 bg-green-500 text-white rounded-lg transition-colors
-                ${isCurrentPlayerActive ? 'hover:bg-green-600' : 'opacity-50 cursor-not-allowed'}`}
-              disabled={!isCurrentPlayerActive}
-            >
-              Play
-            </button>
-            <button
-              onClick={handleSurrender}
-              className={`px-6 py-2 bg-red-500 text-white rounded-lg transition-colors
-                ${isCurrentPlayerActive ? 'hover:bg-red-600' : 'opacity-50 cursor-not-allowed'}`}
-              disabled={!isCurrentPlayerActive}
-            >
-              Surrender
-            </button>
-          </div>
-        )}
-
-        {/* Waiting Message */}
-        {waitingPlayers.length > 0 && !hasCurrentPlayerSurrendered && (
-          <div className="text-center text-gray-600 mb-4">
-            Waiting for {waitingPlayers.length} player{waitingPlayers.length > 1 ? 's' : ''} to act...
-          </div>
-        )}
-
-        {/* Game Results */}
-        {gameState.game_phase === 'complete' && currentPlayer && (
-          <div className="mt-8 p-4 bg-white rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-2">Game Results</h3>
-            {currentPlayer.main_payout !== undefined && (
-              <div className="mb-2">
-                Main Bet: {currentPlayer.main_payout > 0 ? 'Won' : 'Lost'} ${Math.abs(currentPlayer.main_payout)}
+          {/* Current Player's Hand or Debug Message */}
+          {currentPlayer ? (
+            <div className="mb-8">
+              <div className="flex justify-end items-center mb-2">
+                {/* <h2 className="text-xl font-bold">Your Hand</h2> */}
+                <div className="flex flex-row items-end gap-2">
+                  {/* <div className="text-sm text-gray-600">
+                    Status: {isCurrentPlayerActive ? 'Active' : 'Inactive'} | 
+                    {hasCurrentPlayerActed ? ' Acted' : ' Not Acted'} | 
+                    {hasCurrentPlayerSurrendered ? ' Surrendered' : ' Not Surrendered'}
+                  </div> */}
+                  <div>&nbsp;</div>
+                  <button
+                    onClick={() => setShowPlayerCards(!showPlayerCards)}
+                    className={`px-4 py-2 mb-4 rounded transition-colors duration-200 
+                      ${showPlayerCards ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} 
+                      text-white ${(!isConnected || !isCurrentPlayerActive) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={!isConnected || !isCurrentPlayerActive}
+                  >
+                    {showPlayerCards ? 'Hide Cards' : 'Show Cards'}
+                  </button>
+                </div>
               </div>
-            )}
-            {(currentPlayer.high_payout !== undefined || currentPlayer.low_payout !== undefined) && (
-              <div>
-                Side Bets:
-                {currentPlayer.high_payout !== undefined && (
-                  <div>High: {currentPlayer.high_payout > 0 ? 'Won' : 'Lost'} ${Math.abs(currentPlayer.high_payout)}</div>
-                )}
-                {currentPlayer.low_payout !== undefined && (
-                  <div>Low: {currentPlayer.low_payout > 0 ? 'Won' : 'Lost'} ${Math.abs(currentPlayer.low_payout)}</div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+              <PlayerHand
+                playerId={currentPlayerId || ''}
+                hand={currentPlayer.hand}
+                active={isCurrentPlayerActive}
+                result={currentPlayer.result}
+                showCards={showPlayerCards || gameState.game_phase === 'revealed'}
+                highCombination={currentPlayer.high_combination}
+                lowCombination={currentPlayer.low_combination}
+                mainBetResult={currentPlayer.main_bet_result}
+                has_acted={currentPlayer.has_acted}
+                action_type={currentPlayer.action_type || undefined}
+              />
+              {!isCurrentPlayerActive && (
+                <div className="text-center text-red-600 mt-2">
+                  You are not active in this game. (Player ID: {currentPlayerId})
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="mb-8 text-center text-red-600">
+              Player not found. (Player ID: {currentPlayerId})<br />
+              Please check the URL or ask the dealer to activate your player.
+            </div>
+          )}
+
+          {/* Player Actions */}
+          {currentPlayer && (
+            <div className="flex justify-center gap-4 mb-8">
+              <button
+                onClick={handlePlay}
+                className={`px-6 py-2 bg-green-500 text-white rounded-lg transition-colors
+                  ${isCurrentPlayerActive && !hasCurrentPlayerActed && currentPlayer.hand.length > 0 ? 'hover:bg-green-600' : 'opacity-50 cursor-not-allowed'}`}
+                disabled={!isCurrentPlayerActive || hasCurrentPlayerActed || currentPlayer.hand.length === 0}
+              >
+                Play
+              </button>
+              <button
+                onClick={handleSurrender}
+                className={`px-6 py-2 bg-red-500 text-white rounded-lg transition-colors
+                  ${isCurrentPlayerActive && !hasCurrentPlayerActed && currentPlayer.hand.length > 0 ? 'hover:bg-red-600' : 'opacity-50 cursor-not-allowed'}`}
+                disabled={!isCurrentPlayerActive || hasCurrentPlayerActed || currentPlayer.hand.length === 0}
+              >
+                Surrender
+              </button>
+            </div>
+          )}
+
+          {/* Waiting Message */}
+          {waitingPlayers.length > 0 && (
+            <div className="text-center text-black mb-4">
+              Waiting for {waitingPlayers.length} player{waitingPlayers.length > 1 ? 's' : ''} to act...
+            </div>
+          )}
+
+          {/* Game Results */}
+          {gameState.game_phase === 'complete' && currentPlayer && (
+            <div className="mt-8 p-4 bg-white rounded-lg shadow">
+              <h3 className="text-lg font-semibold mb-2">Game Results</h3>
+              {currentPlayer.main_payout !== undefined && (
+                <div className="mb-2">
+                  Main Bet: {currentPlayer.main_payout > 0 ? 'Won' : 'Lost'} ${Math.abs(currentPlayer.main_payout)}
+                </div>
+              )}
+              {(currentPlayer.high_payout !== undefined || currentPlayer.low_payout !== undefined) && (
+                <div>
+                  Side Bets:
+                  {currentPlayer.high_payout !== undefined && (
+                    <div>High: {currentPlayer.high_payout > 0 ? 'Won' : 'Lost'} ${Math.abs(currentPlayer.high_payout)}</div>
+                  )}
+                  {currentPlayer.low_payout !== undefined && (
+                    <div>Low: {currentPlayer.low_payout > 0 ? 'Won' : 'Lost'} ${Math.abs(currentPlayer.low_payout)}</div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

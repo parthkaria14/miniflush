@@ -55,7 +55,7 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
   };
 
   return (
-    <div className={`p-4 rounded-lg bg-[#A42210] h-[24vh] border-4 border-[#D6AB5D] border-dashed ${isDealer ? 'w-[61.5vw]' : 'w-[30vw]'} ${isNextToDeal ? 'ring-4 ring-yellow-500 ring-opacity-100 shadow-[0_0_20px_#D6AB5D]' : ''}`} >
+    <div className={`p-4 rounded-lg bg-[#A42210] min-h-[24vh] border-4 border-[#D6AB5D] border-dashed ${isDealer ? 'w-[61.5vw]' : 'min-w-[30vw] max-w-[61.5vw]'} ${isNextToDeal ? 'ring-4 ring-yellow-500 ring-opacity-100 shadow-[0_0_20px_#D6AB5D]' : ''}`} >
       <div className="flex justify-between items-center mb-2">
         <div>
           <h3 className="text-5xl font-semibold text-white m-5">
@@ -67,11 +67,11 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
             )}   */}
           </h3>
         </div>
-        {/* {result && (
+        {result && (
           <span className={`font-bold ${getResultColor()}`}>
-            {getResultText()} ig i can can put the text here if i need more space in the playerHand
+            {getResultText()}
           </span>
-        )} */}
+        )}
       </div>
       {isDealer && dealerQualifies === false && (
         <p className="text-2xl text-white mb-2 font-semibold ml-6">

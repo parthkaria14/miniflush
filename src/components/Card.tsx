@@ -1,4 +1,5 @@
-import React from 'react';
+// "use client";
+import React, { useState } from 'react';
 
 interface CardProps {
   card: string;
@@ -6,27 +7,49 @@ interface CardProps {
 }
 
 const Card: React.FC<CardProps> = ({ card, hidden = false }) => {
+  const isPlayerPage = window.location.pathname.includes('/player/');
+  const cardSize = isPlayerPage ? 'w-56 h-72' : 'w-40 h-56';
+  const [isTouched, setIsTouched] = useState(false);
+
+  const handleTouchStart = () => {
+    if (isPlayerPage) {
+      console.log("touched");
+      setIsTouched(prev => !prev);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (isPlayerPage) {
+      console.log("untouched");
+      setIsTouched(prev => !prev);
+    }
+  };
+
   // If it's an empty slot (card === 'back')
   if (card === 'back') {
     return (
-      <div className="w-40 h-56 rounded-lg shadow-md transform hover:scale-105 transition-transform">
+      <div className={`${cardSize} rounded-lg shadow-md transform`}>
         <img 
           src="/cards/card_back.png" 
           alt="Card Back"
-          className="w-full h-full object-contain"
+          className="w-full h-full object-fill"
         />
       </div>
     );
   }
 
   // If the card is hidden (dealt but not revealed)
-  if (hidden) {
+  if (hidden && !isTouched) {
     return (
-      <div className="w-40 h-56 rounded-lg shadow-md transform hover:scale-105 transition-transform">
+      <div 
+        className={`${cardSize} rounded-lg shadow-md transform`}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         <img 
           src="/cards/BR.png" 
           alt="Dealt Card"
-          className="w-full h-full object-contain"
+          className="w-full h-full object-fill"
         />
       </div>
     );
@@ -34,11 +57,15 @@ const Card: React.FC<CardProps> = ({ card, hidden = false }) => {
 
   // If the card is revealed
   return (
-    <div className="w-40 h-56 rounded-lg shadow-md transform hover:scale-105 transition-transform">
+    <div 
+      className={`${cardSize} rounded-lg shadow-md transform`}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      >
       <img 
         src={`/cards/${card}.png`} 
         alt={`Card ${card}`}
-        className="w-full h-full object-contain"
+        className="w-full h-full object-fill"
       />
     </div>
   );
