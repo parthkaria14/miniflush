@@ -8,9 +8,16 @@ import asyncio
 import logging
 from pymongo.errors import ServerSelectionTimeoutError
 import copy
+import re
+import serial
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
+
+# Serial port configuration for shoe reader
+SERIAL_PORT = "COM3"  # Adjust this to match your serial port
+BAUD_RATE = 9600
+ser = None
 
 MONGO_URI = "mongodb://localhost:27017"  # or your Atlas URI
 DB_NAME = "game_db"
@@ -322,6 +329,14 @@ async def handle_connection(websocket):
                 await handle_player_played(data.get("player"))
             elif data["action"] == "player_surrendered":
                 await handle_player_surrendered(data.get("player"))
+            elif data["action"] == "test_card_reading":
+                await handle_test_card_reading(data.get("test_data"))
+            elif data["action"] == "change_game_settings":
+                await handle_change_game_settings(
+                    data.get("min_bet"), 
+                    data.get("max_bet"), 
+                    data.get("table_number")
+                )
 
     except websockets.ConnectionClosed:
         print(f"Client disconnected: {websocket.remote_address}")
@@ -804,6 +819,64 @@ async def handle_player_surrendered(player_id):
             "game_state": game_state
         })
 
+async def handle_test_card_reading(test_data):
+    """Handles testing of card reading functionality."""
+    if test_data:
+        card = extract_card_value(test_data)
+        print(f"Test data: {test_data}")
+        print(f"Extracted card: {card}")
+        
+        if card:
+            await handle_add_card(card)
+            await broadcast({
+                "action": "test_card_result",
+                "test_data": test_data,
+                "extracted_card": card,
+                "success": True
+            })
+        else:
+            await broadcast({
+                "action": "test_card_result",
+                "test_data": test_data,
+                "extracted_card": None,
+                "success": False,
+                "message": "Could not extract card value from test data"
+            })
+    else:
+        await broadcast({
+            "action": "error",
+            "message": "No test data provided"
+        })
+
+async def handle_change_game_settings(min_bet=None, max_bet=None, table_number=None):
+    """Changes the minimum bet, maximum bet, and table number settings."""
+    global game_state
+    
+    # Save state before making changes
+    save_state()
+    
+    # Update only the provided values
+    if min_bet is not None:
+        game_state["min_bet"] = min_bet
+        print(f"Min bet changed to: {min_bet}")
+    
+    if max_bet is not None:
+        game_state["max_bet"] = max_bet
+        print(f"Max bet changed to: {max_bet}")
+    
+    if table_number is not None:
+        game_state["table_number"] = table_number
+        print(f"Table number changed to: {table_number}")
+    
+    # Broadcast the updated settings
+    await broadcast({
+        "action": "game_settings_changed",
+        "min_bet": game_state["min_bet"],
+        "max_bet": game_state["max_bet"],
+        "table_number": game_state["table_number"],
+        "message": "Game settings updated successfully"
+    })
+
 async def record_wins(winners):
     """Records game wins in MongoDB."""
     win_record = {
@@ -849,9 +922,33 @@ async def broadcast(message):
 
 async def main():
     """Starts the WebSocket server."""
+    # Initialize serial port for shoe reader
+    global ser
+    try:
+        ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
+        print(f"Connected to shoe reader on {SERIAL_PORT}")
+    except serial.SerialException as e:
+        print(f"Serial port error: {e}")
+        logging.error(f"Failed to connect to shoe reader on {SERIAL_PORT}: {e}")
+        ser = None
+    
+    # Start the serial reader as a background task
+    serial_task = asyncio.create_task(read_from_serial())
+    
     async with websockets.serve(handle_connection, "localhost", 6789):
         print("Mini Flush WebSocket server running on ws://localhost:6789")
-        await asyncio.Future()
+        print(f"Shoe reader attempting to connect on {SERIAL_PORT}")
+        
+        # Wait for both the WebSocket server and serial reader
+        try:
+            await asyncio.gather(
+                asyncio.Future(),  # Keep WebSocket server running
+                serial_task
+            )
+        except KeyboardInterrupt:
+            print("Shutting down server...")
+            if ser and ser.is_open:
+                ser.close()
 
 async def check_connection():
     try:
@@ -861,6 +958,25 @@ async def check_connection():
     except ServerSelectionTimeoutError as e:
         logging.error("❌ Could not connect to MongoDB: %s", e)
         exit(1)
+
+def extract_card_value(input_string):
+    """
+    Extract the card value from the input string formatted like:
+    [Manual Burn Cards]<Card:{data}>
+    """
+    match = re.search(r"<Card:(.*?)>", input_string)
+    return match.group(1) if match else None
+
+async def read_from_serial():
+    """Continuously reads card values from the casino shoe reader and adds them to the game."""
+    while True:
+        if ser and ser.in_waiting > 0:
+            raw_data = ser.readline().decode("utf-8").strip()
+            card = extract_card_value(raw_data)
+            print ("card:",card)
+            if card:
+                await handle_add_card(card)
+        await asyncio.sleep(0.1)  # Adjust delay if necessary
 
 if __name__ == "__main__":
     asyncio.run(main())
