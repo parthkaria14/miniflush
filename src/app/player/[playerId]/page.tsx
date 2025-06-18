@@ -5,6 +5,7 @@ import { useWebSocket } from '@/contexts/WebSocketContext';
 import PlayerHand from '@/components/PlayerHand';
 import Notification from '@/components/Notification';
 import Client_Navbar from '@/components/Client_NavBar';
+import WinnerModal from '@/components/WinnerModal';
 
 interface Player {
   hand: string[];
@@ -29,6 +30,8 @@ export default function PlayerView() {
   const [showPlayerCards, setShowPlayerCards] = useState(false);
   const [playerActions, setPlayerActions] = useState<Set<string>>(new Set());
   const [currentPlayerId, setCurrentPlayerId] = useState<string | null>(null);
+  const [showWinnerModal, setShowWinnerModal] = useState(false);
+  const [winner, setWinner] = useState<number | null>(null);
 
   // Get current player ID from URL
   useEffect(() => {
@@ -140,6 +143,20 @@ export default function PlayerView() {
     }
   }, [currentPlayerId, isConnected, isCurrentPlayerActive, hasCurrentPlayerActed, hasCurrentPlayerSurrendered, gameState]);
 
+  // Check for player win/lose and show WinnerModal
+  useEffect(() => {
+    // Check if game phase is revealed and current player has a result
+    if (gameState.game_phase === 'revealed' && currentPlayer && currentPlayer.result) {
+      if (currentPlayer.result === 'win') {
+        setWinner(0); // Player wins
+        setShowWinnerModal(true);
+      } else if (currentPlayer.result === 'lose') {
+        setWinner(1); // Player loses (dealer wins)
+        setShowWinnerModal(true);
+      }
+    }
+  }, [gameState.game_phase, currentPlayer]);
+
   // Get active players who haven't acted yet
   const waitingPlayers = Object.entries(gameState.players)
     .filter(([_, player]) => (player as Player).active && !(player as Player).has_acted && (player as Player).action_type !== 'surrender')
@@ -197,8 +214,7 @@ export default function PlayerView() {
                   <div>&nbsp;</div>
                   <button
                     onClick={() => setShowPlayerCards(!showPlayerCards)}
-                    className={`px-4 py-2 mb-4 rounded transition-colors duration-200 
-                      ${showPlayerCards ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} 
+                    className={`px-4 py-2 mb-4 rounded transition-colors duration-200 bg-[#741003]
                       text-white ${(!isConnected || !isCurrentPlayerActive) ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={!isConnected || !isCurrentPlayerActive}
                   >
@@ -248,7 +264,7 @@ export default function PlayerView() {
                   ${isCurrentPlayerActive && !hasCurrentPlayerActed && currentPlayer.hand.length > 0 ? 'hover:bg-red-600' : 'opacity-50 cursor-not-allowed'}`}
                 disabled={!isCurrentPlayerActive || hasCurrentPlayerActed || currentPlayer.hand.length === 0}
               >
-                Surrender
+                Fold
               </button>
             </div>
           )}
@@ -284,6 +300,13 @@ export default function PlayerView() {
           )}
         </div>
       </div>
+
+      {/* Winner Modal */}
+      <WinnerModal 
+        show={showWinnerModal} 
+        onClose={() => setShowWinnerModal(false)} 
+        winner={winner} 
+      />
     </div>
   );
 }

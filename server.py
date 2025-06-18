@@ -671,8 +671,8 @@ async def handle_reveal_hands():
             player["result"] = "lose"
     
     # Record wins in database
-    if game_state["winners"]:
-        await record_wins(game_state["winners"])
+    # if game_state["winners"]:
+    await record_wins(game_state["winners"])
     
     await broadcast({
         "action": "hands_revealed",

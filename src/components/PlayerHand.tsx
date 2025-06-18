@@ -48,6 +48,7 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
     if (!result) return '';
     if (result === 'win') return 'Won';
     if (result === 'lose') return 'Lost';
+    if (result === 'surrender') return 'Fold'
     return 'ANTE';
   };
 
@@ -69,7 +70,7 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
           </h3>
         </div>
         {result && (
-          <span className={`font-bold ${getResultColor()}`}>
+          <span className={`font-bold texl-xl text-white mx-8`}>
             {getResultText()}
           </span>
         )}
