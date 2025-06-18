@@ -332,6 +332,7 @@ async def handle_connection(websocket):
             elif data["action"] == "test_card_reading":
                 await handle_test_card_reading(data.get("test_data"))
             elif data["action"] == "change_game_settings":
+                print(f"Received change_game_settings action: {data}")
                 await handle_change_game_settings(
                     data.get("min_bet"), 
                     data.get("max_bet"), 
@@ -852,6 +853,8 @@ async def handle_change_game_settings(min_bet=None, max_bet=None, table_number=N
     """Changes the minimum bet, maximum bet, and table number settings."""
     global game_state
     
+    print(f"handle_change_game_settings called with: min_bet={min_bet}, max_bet={max_bet}, table_number={table_number}")
+    
     # Save state before making changes
     save_state()
     
@@ -867,6 +870,8 @@ async def handle_change_game_settings(min_bet=None, max_bet=None, table_number=N
     if table_number is not None:
         game_state["table_number"] = table_number
         print(f"Table number changed to: {table_number}")
+    
+    print(f"Current game state after update: min_bet={game_state['min_bet']}, max_bet={game_state['max_bet']}, table_number={game_state['table_number']}")
     
     # Broadcast the updated settings
     await broadcast({

@@ -18,6 +18,8 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
   const { gameState, sendMessage, isConnected, notifications, removeNotification, addNotification } = useWebSocket();
   const [isBetModalOpen, setIsBetModalOpen] = useState(false);
   const [tempBet, setTempBet] = useState({ min: 10, max: 1000 });
+  const [isTableModalOpen, setIsTableModalOpen] = useState(false);
+  const [tempTableNumber, setTempTableNumber] = useState('');
   const [selectedRank, setSelectedRank] = useState('');
   const [selectedSuit, setSelectedSuit] = useState('');
 
@@ -67,16 +69,13 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
       return;
     }
     
-    console.log(gameState.max_bet);
-    console.log(gameState.min_bet);
+    console.log('Saving bet amounts:', tempBet);
+    console.log('Current game state:', gameState);
     
     sendMessage({
-      action: 'update_game',
-      game_state: {
-        ...gameState,
-        min_bet: tempBet.min,
-        max_bet: tempBet.max
-      }
+      action: 'change_game_settings',
+      min_bet: tempBet.min,
+      max_bet: tempBet.max
     });
     addNotification('Updating bet limits...', 'info');
     setIsBetModalOpen(false);
@@ -119,6 +118,38 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
       setSelectedRank('');
       setSelectedSuit('');
     }
+  };
+
+  const handleOpenTableModal = () => {
+    setTempTableNumber(gameState.table_number?.toString() || '');
+    setIsTableModalOpen(true);
+  };
+
+  const handleSaveTable = () => {
+    if (!tempTableNumber || tempTableNumber.trim() === '') {
+      addNotification('Table number cannot be empty', 'error');
+      return;
+    }
+    
+    const tableNumber = parseInt(tempTableNumber);
+    if (isNaN(tableNumber) || tableNumber < 1) {
+      addNotification('Table number must be a positive number', 'error');
+      return;
+    }
+    
+    console.log('Saving table number:', tableNumber);
+    console.log('Current game state:', gameState);
+    
+    sendMessage({
+      action: 'change_game_settings',
+      table_number: tableNumber
+    });
+    addNotification('Updating table number...', 'info');
+    setIsTableModalOpen(false);
+  };
+
+  const handleCancelTable = () => {
+    setIsTableModalOpen(false);
   };
 
   if (!open) return null;
@@ -256,7 +287,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
                     key="enter-table-number"
                     className="rounded-lg shadow text-3xl font-bold flex items-center justify-center"
                     style={{ width: 780, height: 98, backgroundColor: '#fff', color: '#741003' }}
-                    onClick={() => (console.log(gameState.table_number))}
+                    onClick={handleOpenTableModal}
                   >
                     Enter table number
                   </button>
@@ -379,6 +410,45 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
               </button>
               <button
                 onClick={handleCancelBet}
+                className="px-6 py-3 bg-red-500 text-white rounded-lg text-3xl font-bold hover:bg-red-600"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Table Settings Modal */}
+      {isTableModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-60">
+          <div className="rounded-lg shadow-lg p-8 relative min-w-[320px] max-w-[90vw] max-h-[90vh] flex flex-col items-center justify-center"
+            style={{ backgroundColor: '#F0DEAD' }}>
+            <h2 className="text-3xl font-bold mb-6">Change Table Number</h2>
+            
+            <div className="flex flex-col gap-4 w-full max-w-md">
+              <div className="flex flex-col gap-2">
+                <label className="text-3xl font-semibold">Table Number</label>
+                <input
+                  type="number"
+                  value={tempTableNumber}
+                  onChange={(e) => setTempTableNumber(e.target.value)}
+                  className="px-4 py-2 border rounded-lg text-3xl"
+                  min="1"
+                  placeholder="Enter table number"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-4 mt-8">
+              <button
+                onClick={handleSaveTable}
+                className="px-6 py-3 bg-green-500 text-white rounded-lg text-3xl font-bold hover:bg-green-600"
+              >
+                Save Changes
+              </button>
+              <button
+                onClick={handleCancelTable}
                 className="px-6 py-3 bg-red-500 text-white rounded-lg text-3xl font-bold hover:bg-red-600"
               >
                 Cancel

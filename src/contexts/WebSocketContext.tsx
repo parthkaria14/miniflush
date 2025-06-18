@@ -176,6 +176,21 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               setPreviousGameState(gameState);
               setGameState(data.game_state);
               break;
+            case 'game_settings_changed':
+              console.log('Received game_settings_changed:', data);
+              setPreviousGameState(gameState);
+              setGameState(prev => {
+                const newState = {
+                  ...prev,
+                  min_bet: data.min_bet,
+                  max_bet: data.max_bet,
+                  table_number: data.table_number
+                };
+                console.log('Updated game state:', newState);
+                return newState;
+              });
+              addNotification(data.message || 'Game settings updated successfully', 'success');
+              break;
             case 'player_added':
             case 'player_removed':
               setPreviousGameState(gameState);

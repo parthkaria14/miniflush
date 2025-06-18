@@ -37,6 +37,7 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
   action_type
 }) => {
   const getResultColor = () => {
+    console.log(result);
     if (!result) return 'text-gray-400';
     if (result === 'win') return 'text-green-500';
     if (result === 'lose') return 'text-red-500';
@@ -47,7 +48,7 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
     if (!result) return '';
     if (result === 'win') return 'Won';
     if (result === 'lose') return 'Lost';
-    return 'Push';
+    return 'ANTE';
   };
 
   const formatCombination = (combination: string) => {
