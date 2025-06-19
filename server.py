@@ -972,6 +972,42 @@ def extract_card_value(input_string):
     match = re.search(r"<Card:(.*?)>", input_string)
     return match.group(1) if match else None
 
+# Helper to get list of active player IDs in order
+def get_active_player_ids():
+    return [pid for pid, player in game_state["players"].items() if player["active"]]
+
+# State to track dealing progress
+foolproof_deal_state = {
+    "current_player_index": 0,
+    "player_cards": {},  # player_id: number of cards dealt
+    "dealer_cards": 0
+}
+
+async def foolproof_deal_card(card):
+    active_players = get_active_player_ids()
+    # Initialize player_cards if needed
+    for pid in active_players:
+        if pid not in foolproof_deal_state["player_cards"]:
+            foolproof_deal_state["player_cards"][pid] = 0
+    # Remove players who are no longer active
+    for pid in list(foolproof_deal_state["player_cards"].keys()):
+        if pid not in active_players:
+            del foolproof_deal_state["player_cards"][pid]
+    # Deal to players first
+    for pid in active_players:
+        if foolproof_deal_state["player_cards"][pid] < 3:
+            await handle_add_card(card, pid)
+            foolproof_deal_state["player_cards"][pid] += 1
+            return
+    # Then deal to dealer
+    if foolproof_deal_state["dealer_cards"] < 3:
+        await handle_add_card(card, "dealer")
+        foolproof_deal_state["dealer_cards"] += 1
+        return
+    # If everyone has 3 cards, ignore the card
+    print(f"All players and dealer have 3 cards, ignoring: {card}")
+
+# Replace smart_deal_card with foolproof_deal_card in read_from_serial
 async def read_from_serial():
     """Continuously reads card values from the casino shoe reader and adds them to the game."""
     while True:
@@ -980,8 +1016,8 @@ async def read_from_serial():
             card = extract_card_value(raw_data)
             print ("card:",card)
             if card:
-                await handle_add_card(card)
-        await asyncio.sleep(0.1)  # Adjust delay if necessary
+                await foolproof_deal_card(card)
+        await asyncio.sleep(0.01)  # Minimal sleep to yield control
 
 if __name__ == "__main__":
     asyncio.run(main())
