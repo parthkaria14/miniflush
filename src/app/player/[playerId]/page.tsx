@@ -168,7 +168,7 @@ export default function PlayerView() {
       <div className="m-3 poko p-2 bg-[#911606] flex justify-center" style={{ border: '10px solid #D6AB5D' }}>
         <div className="mx-auto">
           {/* Connection Status */}
-          <div className="mb-4">
+          <div className="">
             {/* <div className={`inline-block px-3 py-1 rounded-full text-sm ${
               isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
             }`}>
@@ -177,7 +177,7 @@ export default function PlayerView() {
           </div>
 
           {/* Game Phase */}
-          <div className="mb-4 text-center">
+          <div className="mb-2 text-center">
             <span className="inline-block px-4 py-2 bg-[#741003] text-white text-sm rounded-lg">
               {gameState?.game_phase ? 
                 gameState.game_phase.charAt(0).toUpperCase() + gameState.game_phase.slice(1) : 
@@ -249,7 +249,7 @@ export default function PlayerView() {
 
           {/* Player Actions */}
           {currentPlayer && (
-            <div className="flex justify-center gap-4 mb-4">
+            <div className="flex justify-center gap-4 mb-2">
               <button
                 onClick={handlePlay}
                 className={`px-6 py-2 bg-green-500 text-white rounded-lg transition-colors
@@ -271,7 +271,7 @@ export default function PlayerView() {
 
           {/* Waiting Message */}
           {waitingPlayers.length > 0 && (
-            <div className="text-center text-black mb-4">
+            <div className="text-center text-black mb-2">
               Waiting for {waitingPlayers.length} player{waitingPlayers.length > 1 ? 's' : ''} to act...
             </div>
           )}

@@ -228,7 +228,7 @@ export default function DealerView() {
         />
       ))}
 
-      <div className="m-12 poko p-8 bg-[#911606]" style={{ border: '10px solid #D6AB5D' }}>
+      <div className="m-5 poko p-2 bg-[#911606]" style={{ border: '10px solid #D6AB5D' }}>
         {/* <header className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-3xl font-bold text-gray-900">Mini Flush Dealer View</h1>
@@ -342,7 +342,7 @@ export default function DealerView() {
         </header> */}
 
         <main>
-          <div className="mb-8">
+          <div className="mb-2">
             {/* Dealer's Hand */}
             <PlayerHand
               key="dealer"

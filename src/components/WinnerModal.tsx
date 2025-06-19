@@ -17,12 +17,12 @@ const WinnerModal = ({ show, onClose, winner }: { show: boolean; onClose: () => 
       // Hide the modal after 5 seconds
       const timer = setTimeout(() => {
         onClose();
-      }, 10000);
+      }, 5000);
 
       // Stop confetti after 5 seconds
       const confettiTimer = setTimeout(() => {
         setShowConfetti(false);
-      }, 10000);
+      }, 5000);
 
       return () => {
         clearTimeout(timer);
@@ -54,7 +54,7 @@ const WinnerModal = ({ show, onClose, winner }: { show: boolean; onClose: () => 
             <div className="flex items-center justify-center">
               {winner === 0 && (
                 <>
-                <img src="/assets/blue_a.png" alt="Player Wins" className="w-24 h-24 mr-4" />
+                <img src="/assets/gg.gif" alt="Player Wins" className="w-28 h-24 mr-4" />
                 <div className="text-4xl font-bold text-gray-800 text-center mb-4 w-full">
               YOU WIN!!
               </div>
@@ -62,7 +62,7 @@ const WinnerModal = ({ show, onClose, winner }: { show: boolean; onClose: () => 
               )}
               {winner === 1 && (
                 <>
-                <img src="/assets/red_b.png" alt="Dealer Wins" className="w-24 h-24 mr-4" />
+                <img src="/assets/gg.gif" alt="Dealer Wins" className="w-28 h-24 mr-4" />
                 <div className="text-4xl font-bold text-gray-800 text-center mb-4 w-full">
               DEALER WINS!!
               </div>
