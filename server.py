@@ -985,27 +985,34 @@ foolproof_deal_state = {
 
 async def foolproof_deal_card(card):
     active_players = get_active_player_ids()
+    logging.info(f"Received card to deal: {card}")
     # Initialize player_cards if needed
     for pid in active_players:
         if pid not in foolproof_deal_state["player_cards"]:
             foolproof_deal_state["player_cards"][pid] = 0
+            logging.info(f"Initializing card count for {pid}")
     # Remove players who are no longer active
     for pid in list(foolproof_deal_state["player_cards"].keys()):
         if pid not in active_players:
+            logging.info(f"Removing inactive player from deal state: {pid}")
             del foolproof_deal_state["player_cards"][pid]
     # Deal to players first
     for pid in active_players:
         if foolproof_deal_state["player_cards"][pid] < 3:
+            logging.info(f"Dealing card {card} to {pid} (current count: {foolproof_deal_state['player_cards'][pid]})")
             await handle_add_card(card, pid)
             foolproof_deal_state["player_cards"][pid] += 1
+            logging.info(f"{pid} now has {foolproof_deal_state['player_cards'][pid]} cards")
             return
     # Then deal to dealer
     if foolproof_deal_state["dealer_cards"] < 3:
+        logging.info(f"Dealing card {card} to dealer (current count: {foolproof_deal_state['dealer_cards']})")
         await handle_add_card(card, "dealer")
         foolproof_deal_state["dealer_cards"] += 1
+        logging.info(f"Dealer now has {foolproof_deal_state['dealer_cards']} cards")
         return
     # If everyone has 3 cards, ignore the card
-    print(f"All players and dealer have 3 cards, ignoring: {card}")
+    logging.info(f"All players and dealer have 3 cards, ignoring: {card}")
 
 # Replace smart_deal_card with foolproof_deal_card in read_from_serial
 async def read_from_serial():
@@ -1013,10 +1020,13 @@ async def read_from_serial():
     while True:
         if ser and ser.in_waiting > 0:
             raw_data = ser.readline().decode("utf-8").strip()
+            logging.info(f"Raw data from serial: {raw_data}")
             card = extract_card_value(raw_data)
-            print ("card:",card)
+            logging.info(f"Extracted card: {card}")
             if card:
                 await foolproof_deal_card(card)
+            else:
+                logging.info("No valid card extracted from serial data.")
         await asyncio.sleep(0.01)  # Minimal sleep to yield control
 
 if __name__ == "__main__":
