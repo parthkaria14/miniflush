@@ -8,7 +8,7 @@ interface CardProps {
 
 const Card: React.FC<CardProps> = ({ card, hidden = false }) => {
   const isPlayerPage = window.location.pathname.includes('/player/');
-  const cardSize = isPlayerPage ? 'w-56 h-72' : 'w-40 h-56';
+  const cardSize = 'w-20 h-28';
   const [isTouched, setIsTouched] = useState(false);
 
   const handleTouchStart = () => {

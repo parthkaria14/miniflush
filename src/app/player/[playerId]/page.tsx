@@ -165,7 +165,7 @@ export default function PlayerView() {
   return (
     <div className="min-h-screen bg-[#450A03] }">
       <Client_Navbar/>
-      <div className="m-12 poko p-8 bg-[#911606] flex justify-center" style={{ border: '10px solid #D6AB5D' }}>
+      <div className="m-3 poko p-2 bg-[#911606] flex justify-center" style={{ border: '10px solid #D6AB5D' }}>
         <div className="mx-auto">
           {/* Connection Status */}
           <div className="mb-4">
@@ -178,7 +178,7 @@ export default function PlayerView() {
 
           {/* Game Phase */}
           <div className="mb-4 text-center">
-            <span className="inline-block px-4 py-2 bg-[#741003] text-white text-2xl rounded-lg">
+            <span className="inline-block px-4 py-2 bg-[#741003] text-white text-sm rounded-lg">
               {gameState?.game_phase ? 
                 gameState.game_phase.charAt(0).toUpperCase() + gameState.game_phase.slice(1) : 
                 'Waiting for game state...'}
@@ -186,7 +186,7 @@ export default function PlayerView() {
           </div>
 
           {/* Dealer's Hand */}
-          <div className="mb-8">
+          <div className="mb-4">
             {/* <h2 className="text-xl font-bold mb-2">Dealer's Hand</h2> */}
             <PlayerHand
               playerId="dealer"
@@ -202,7 +202,7 @@ export default function PlayerView() {
 
           {/* Current Player's Hand or Debug Message */}
           {currentPlayer ? (
-            <div className="mb-8">
+            <div className="mb-4">
               <div className="flex justify-end items-center mb-2">
                 {/* <h2 className="text-xl font-bold">Your Hand</h2> */}
                 <div className="flex flex-row items-end gap-2">
@@ -214,7 +214,7 @@ export default function PlayerView() {
                   <div>&nbsp;</div>
                   <button
                     onClick={() => setShowPlayerCards(!showPlayerCards)}
-                    className={`px-4 py-2 mb-4 rounded transition-colors duration-200 bg-[#741003]
+                    className={`px-4 py-2 mb-2 rounded transition-colors duration-200 bg-[#741003]
                       text-white ${(!isConnected || !isCurrentPlayerActive) ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={!isConnected || !isCurrentPlayerActive}
                   >
@@ -241,7 +241,7 @@ export default function PlayerView() {
               )}
             </div>
           ) : (
-            <div className="mb-8 text-center text-red-600">
+            <div className="mb-4 text-center text-red-600">
               Player not found. (Player ID: {currentPlayerId})<br />
               Please check the URL or ask the dealer to activate your player.
             </div>
@@ -249,7 +249,7 @@ export default function PlayerView() {
 
           {/* Player Actions */}
           {currentPlayer && (
-            <div className="flex justify-center gap-4 mb-8">
+            <div className="flex justify-center gap-4 mb-4">
               <button
                 onClick={handlePlay}
                 className={`px-6 py-2 bg-green-500 text-white rounded-lg transition-colors

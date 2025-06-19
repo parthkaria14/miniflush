@@ -57,11 +57,11 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
   };
 
   return (
-    <div className={`p-4 rounded-lg bg-[#A42210] min-h-[24vh] border-4 border-[#D6AB5D] border-dashed ${isDealer ? 'w-[61.5vw]' : 'min-w-[30vw] max-w-[61.5vw]'} ${isNextToDeal ? 'ring-4 ring-yellow-500 ring-opacity-100 shadow-[0_0_20px_#D6AB5D]' : ''}`} >
-      <div className="flex justify-between items-center mb-2">
+    <div className={`rounded-lg bg-[#A42210] min-h-[14vh] border-4 border-[#D6AB5D] border-dashed ${isDealer ? 'w-[61.5vw]' : 'min-w-[30vw] max-w-[61.5vw]'} ${isNextToDeal ? 'ring-4 ring-yellow-500 ring-opacity-100 shadow-[0_0_20px_#D6AB5D]' : ''}`} >
+      <div className="flex justify-between items-center mb-1">
         <div>
-          <h3 className="text-5xl font-semibold text-white m-5">
-            {isDealer ? 'Dealer' : playerId.replace(/(\d+)/, ' $1')}
+          <h3 className="text-2xl font-semibold text-white m-2">
+            {isDealer ? 'Dealer' : playerId.replace(/player(\d+)/i, 'Player $1')}
             {/* {isNextToDeal && (
               <span className="ml-2 text-2xl text-yellow-400 font-normal">
                 (Next to deal)
@@ -114,7 +114,7 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
         </p>
       )}
       
-      <div className="flex gap-2 justify-center">
+      <div className="flex gap-2 justify-center mb-4">
         {/* Show actual cards if revealed, otherwise show card backs for each added card */}
         {hand.map((card, index) => (
           <Card
