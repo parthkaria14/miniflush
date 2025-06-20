@@ -15,7 +15,7 @@ import serial
 logging.basicConfig(level=logging.INFO)
 
 # Serial port configuration for shoe reader
-SERIAL_PORT = "COM3"  # Adjust this to match your serial port
+SERIAL_PORT = "COM1"  # Adjust this to match your serial port
 BAUD_RATE = 9600
 ser = None
 
