@@ -1,5 +1,5 @@
-// "use client";
-import React, { useState } from 'react';
+"use client";
+import React, { useState, useEffect } from 'react';
 
 interface CardProps {
   card: string;
@@ -7,9 +7,13 @@ interface CardProps {
 }
 
 const Card: React.FC<CardProps> = ({ card, hidden = false }) => {
-  const isPlayerPage = window.location.pathname.includes('/player');
+  const [isPlayerPage, setIsPlayerPage] = useState(false);
   const cardSize = 'w-20 h-28';
   const [isTouched, setIsTouched] = useState(false);
+
+  useEffect(() => {
+    setIsPlayerPage(window.location.pathname.includes('/player'));
+  }, []);
 
   const handleTouchStart = () => {
     if (isPlayerPage) {
