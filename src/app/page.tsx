@@ -189,7 +189,7 @@ export default function DealerView() {
       }
     };
 
-    const ws = new WebSocket('ws://localhost:6789');
+    const ws = new WebSocket('ws://192.168.2.103:6789');
     ws.addEventListener('message', handleMessage);
     return () => ws.removeEventListener('message', handleMessage);
   }, []);

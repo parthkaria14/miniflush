@@ -940,7 +940,7 @@ async def main():
     # Start the serial reader as a background task
     serial_task = asyncio.create_task(read_from_serial())
     
-    async with websockets.serve(handle_connection, "localhost", 6789):
+    async with websockets.serve(handle_connection, "0.0.0.0", 6789):
         print("Mini Flush WebSocket server running on ws://localhost:6789")
         print(f"Shoe reader attempting to connect on {SERIAL_PORT}")
         

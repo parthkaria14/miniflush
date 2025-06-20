@@ -135,7 +135,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     let reconnectTimeout: NodeJS.Timeout;
 
     const connect = () => {
-      websocket = new WebSocket('ws://localhost:6789');
+      websocket = new WebSocket('ws://192.168.2.103:6789');
 
       websocket.onopen = () => {
         console.log('Connected to WebSocket');
