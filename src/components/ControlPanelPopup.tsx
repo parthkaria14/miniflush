@@ -173,7 +173,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
             <button
               className="px-3 py-1.5 rounded-lg text-xl font-semibold shadow text-white transition-colors"
               style={{ width: 166, height: 49, backgroundColor: selectedMode === 'live' ? '#741003' : '#911606' }}
-              // onClick={() => handleModeChange('live')}
+              onClick={() => handleModeChange('manual')}
             >
               Live Mode
             </button>
