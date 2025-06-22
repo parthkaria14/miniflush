@@ -19,7 +19,7 @@ SERIAL_PORT = "COM1"  # Adjust this to match your serial port
 BAUD_RATE = 9600
 ser = None
 
-MONGO_URI = "mongodb://192.168.2.103:27017"  # or your Atlas URI
+MONGO_URI = "mongodb://localhost:27017"  # or your Atlas URI
 DB_NAME = "game_db"
 COLLECTION_NAME = "game_wins"
 
