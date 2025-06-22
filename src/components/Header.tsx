@@ -66,7 +66,8 @@ const Navbar: React.FC<NavbarProps> = ({
           {/* Right Logo */}
           <div
             className="w-32 h-32 relative flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"
-            onClick={onOpenControlPanel}
+            // onClick={onOpenControlPanel} 
+            onTouchEnd={onOpenControlPanel}
           >
             <Image
               src="/assets/menu.png"

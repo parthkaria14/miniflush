@@ -162,7 +162,8 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
           style={{ backgroundColor: '#F0DEAD' }}
         >
           <button
-            onClick={onClose}
+            // onClick={onClose}
+            onTouchEnd={onClose}
             className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl font-bold focus:outline-none"
             aria-label="Close"
           >
@@ -198,7 +199,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
                 <button
                   key="dealer wins"
                   className="rounded-lg shadow text-xl font-bold flex items-center justify-center"
-                  style={{ width: 300, height: 60, backgroundColor: '#911606', color: '#fff' }}
+                  style={{ width: 250, height: 60, backgroundColor: '#911606', color: '#fff' }}
                 >
                   Dealer wins
                 </button>
@@ -206,7 +207,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
                   <button
                     key={num}
                     className="rounded-lg shadow text-xl font-bold flex items-center justify-center"
-                    style={{ width: 300, height: 60, backgroundColor: '#911606', color: '#fff' }}
+                    style={{ width: 250, height: 60, backgroundColor: '#911606', color: '#fff' }}
                   >
                     Player {num-1} wins
                   </button>
@@ -218,7 +219,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
                   <button
                     key="reset-hand"
                     className="rounded-lg shadow text-xl font-bold flex items-center justify-center"
-                    style={{ width: 390, height: 49, backgroundColor: '#fff', color: '#741003' }}
+                    style={{ width: 250, height: 49, backgroundColor: '#fff', color: '#741003' }}
                     onClick={handleRevealAndClose}
                   >
                     Reveal hand
@@ -226,7 +227,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
                   <button
                     key="undo-last"
                     className="rounded-lg shadow text-xl font-bold flex items-center justify-center"
-                    style={{ width: 390, height: 49, backgroundColor: '#fff', color: '#741003' }}
+                    style={{ width: 250, height: 49, backgroundColor: '#fff', color: '#741003' }}
                     onClick={handleUndoLastAndClose}
                   >
                     Undo last
@@ -234,7 +235,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
                   <button
                     key="reset-game"
                     className="rounded-lg shadow text-xl font-bold flex items-center justify-center"
-                    style={{ width: 390, height: 49, backgroundColor: '#fff', color: '#741003' }}
+                    style={{ width: 250, height: 49, backgroundColor: '#fff', color: '#741003' }}
                     onClick={handleResetTableAndClose}
                     disabled={!isConnected || isLoading}
                   >
@@ -243,7 +244,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
                   <button
                     key="delete-last-game"
                     className="rounded-lg shadow text-xl font-bold flex items-center justify-center"
-                    style={{ width: 390, height: 49, backgroundColor: '#fff', color: '#741003' }}
+                    style={{ width: 250, height: 49, backgroundColor: '#fff', color: '#741003' }}
                     onClick={handleDeleteLastGameAndClose}
                     disabled={!isConnected || isLoading}
                   >
@@ -252,7 +253,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
                   <button
                     key="clear-all-records"
                     className="rounded-lg shadow text-xl font-bold flex items-center justify-center"
-                    style={{ width: 390, height: 49, backgroundColor: '#fff', color: '#741003' }}
+                    style={{ width: 250, height: 49, backgroundColor: '#fff', color: '#741003' }}
                     onClick={handleDeleteGameRecordsAndClose}
                   >
                     Clear all records
@@ -262,14 +263,14 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
                   <button
                     key="max-10000"
                     className="rounded-lg shadow text-xl font-bold flex items-center justify-center"
-                    style={{ width: 390, height: 49, backgroundColor: '#fff', color: '#741003' }}
+                    style={{ width: 250, height: 49, backgroundColor: '#fff', color: '#741003' }}
                   >
                     Max: {gameState.max_bet}
                   </button>
                   <button
                     key="min-10"
                     className="rounded-lg shadow text-xl font-bold flex items-center justify-center"
-                    style={{ width: 390, height: 49, backgroundColor: '#fff', color: '#741003' }}
+                    style={{ width: 250, height: 49, backgroundColor: '#fff', color: '#741003' }}
                     onClick={() => {console.log(gameState.min_bet)}}
                   >
                     Min: {gameState.min_bet}
@@ -277,7 +278,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
                   <button
                     key="change-bets"
                     className="rounded-lg shadow text-xl font-bold flex items-center justify-center"
-                    style={{ width: 390, height: 49, backgroundColor: '#fff', color: '#741003' }}
+                    style={{ width: 250, height: 49, backgroundColor: '#fff', color: '#741003' }}
                     onClick={handleOpenBetModal}
                   >
                     Change bets
@@ -285,7 +286,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
                   <button
                     key="enter-table-number"
                     className="rounded-lg shadow text-xl font-bold flex items-center justify-center"
-                    style={{ width: 390, height: 49, backgroundColor: '#fff', color: '#741003' }}
+                    style={{ width: 250, height: 49, backgroundColor: '#fff', color: '#741003' }}
                     onClick={handleOpenTableModal}
                   >
                     Enter table number
@@ -300,7 +301,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
                   <button
                     key="grid-btn-A"
                     className={`rounded-lg shadow text-xl font-bold flex items-center justify-center ${selectedRank === 'A' ? 'bg-[#741003] text-white' : 'bg-white text-[#741003]'}`}
-                    style={{ width: 110, height: 44 }}
+                    style={{ width: 80, height: 44 }}
                     onClick={() => setSelectedRank('A')}
                   >
                     A
@@ -310,7 +311,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
                     <button
                       key={`grid-btn-${rank}`}
                       className={`rounded-lg shadow text-xl font-bold flex items-center justify-center ${selectedRank === rank ? 'bg-[#741003] text-white' : 'bg-white text-[#741003]'}`}
-                      style={{ width: 110, height: 44 }}
+                      style={{ width: 80, height: 44 }}
                       onClick={() => setSelectedRank(rank)}
                     >
                       {rank}
