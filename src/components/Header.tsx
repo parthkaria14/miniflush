@@ -63,7 +63,7 @@ const Navbar: React.FC<NavbarProps> = ({
             })}
           </div>
 
-          <div className="flex flex-col">
+          {/* <div className="flex flex-col">
           <button
               className=" bg-white relative flex items-center justify-center cursor-pointer"
               onClick={() => sendMessage({ action: 'reveal_hands' })}
@@ -78,7 +78,7 @@ const Navbar: React.FC<NavbarProps> = ({
             >
               menu
           </button>
-          </div>
+          </div> */}
           
 
           {/* Right Logo */}
