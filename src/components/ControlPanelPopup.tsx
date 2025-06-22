@@ -372,7 +372,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
 
       {/* Bet Settings Modal */}
       {isBetModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-60">
+        <div className="fixed top-0 left-0 h-full w-full z-[60] flex items-center justify-center bg-black bg-opacity-60">
           <div className="rounded-lg shadow-lg p-8 relative min-w-[320px] max-w-[90vw] max-h-[90vh] flex flex-col items-center justify-center"
             style={{ backgroundColor: '#F0DEAD' }}>
             <h2 className="text-3xl font-bold mb-6">Change Bet Settings</h2>
@@ -421,7 +421,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
 
       {/* Table Settings Modal */}
       {isTableModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-60">
+        <div className="fixed top-0 left-0 h-full w-full z-[60] flex items-center justify-center bg-black bg-opacity-60">
           <div className="rounded-lg shadow-lg p-8 relative min-w-[320px] max-w-[90vw] max-h-[90vh] flex flex-col items-center justify-center"
             style={{ backgroundColor: '#F0DEAD' }}>
             <h2 className="text-3xl font-bold mb-6">Change Table Number</h2>
