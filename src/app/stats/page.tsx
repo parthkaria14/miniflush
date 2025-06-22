@@ -3,8 +3,52 @@
 import React from 'react';
 import { useWebSocket } from '../../contexts/WebSocketContext';
 
+const playerGrid = [
+  // [playerId, gridClass]
+  ['player1', 'col-start-2 col-end-4 row-start-2 row-end-4 flex items-center justify-center z-10'],
+  ['player2', 'col-start-3 col-end-4 row-start-4 row-end-7 flex items-center justify-center z-10'],
+  ['player3', 'col-start-4 col-end-5 row-start-6 row-end-8 flex items-center justify-center z-10'],
+  ['player4', 'col-start-6 col-end-7 row-start-6 row-end-8 flex items-center justify-center z-10'],
+  ['player5', 'col-start-7 col-end-8 row-start-4 row-end-7 flex items-center justify-center z-10'],
+  ['player6', 'col-start-7 col-end-9 row-start-2 row-end-4 flex items-center justify-center z-10'],
+];
+
+// Add a type for player (partial, as only relevant fields are used)
+type Player = {
+  active?: boolean;
+  result?: string | null;
+  action_type?: string;
+  hand?: string[];
+  has_acted?: boolean;
+};
+
+function getPlayerState(player: Player): 'inactive' | 'won' | 'lost' | 'ante' | 'dealt' | 'played' {
+  if (!player.active) return 'inactive';
+  if (player.result === 'win') return 'won';
+  if (player.result === 'lose') return 'lost';
+  if (player.action_type === 'ante') return 'ante';
+  if (player.hand && player.hand.length === 3 && !player.has_acted) return 'dealt';
+  if (player.hand && player.hand.length === 3 && player.has_acted) return 'played';
+  return 'inactive'; // fallback, but should not be reached
+}
+
+const stateToImg: Record<string, string> = {
+  inactive: '/assets/black.png',
+  won: '/assets/green.png',
+  lost: '/assets/red.png',
+  ante: '/assets/purple.png',
+  dealt: '/assets/brown.png',
+  played: '/assets/brown.png',
+};
+
+const stateToOverlay: Partial<Record<'won' | 'lost' | 'ante', string>> = {
+  won: 'WON',
+  lost: 'LOST',
+  ante: 'ANTE',
+};
+
 const StatsPage = () => {
-  const { gameState, sendMessage, isConnected } = useWebSocket();
+  const { gameState } = useWebSocket();
   return (
     <div className="min-h-screen bg-[#D6AB5D] flex flex-col items-center justify-center">
       <div className="h-[94vh] w-[96vw] m-3 bg-[#971909] flex flex-col">
@@ -30,30 +74,32 @@ const StatsPage = () => {
           <div className="col-start-3 col-end-8 row-start-1 row-end-6 flex items-center justify-center z-10">
             <img src="/assets/center_piece.png" alt="Side Design" className="w-full h-full object-contain" />
           </div>
-          <div className="col-start-2 col-end-4 row-start-2 row-end-4 flex items-center justify-center z-10">
-            <img src="/assets/btn1.png" alt="Side Design" className="w-[17vw] h-[17vh] object-contain" />
-          </div>
-          <div className="col-start-3 col-end-4 row-start-4 row-end-7 flex items-center justify-center z-10">
-            <img src="/assets/btn2.png" alt="Side Design" className="w-[17vw] h-[17vh] object-contain" />
-          </div>
-          <div className="col-start-4 col-end-5 row-start-6 row-end-8 flex items-center justify-center z-10">
-            <img src="/assets/btn3.png" alt="Side Design" className="w-[17vw] h-[17vh] object-contain" />
-          </div>
 
+          {playerGrid.map(([playerId, gridClass], idx) => {
+            const player = gameState.players?.[playerId] || {};
+            const state = getPlayerState(player);
+            const imgSrc = stateToImg[state];
+            const overlay = stateToOverlay[state as keyof typeof stateToOverlay];
+            return (
+              <div key={playerId} className={gridClass}>
+                <div className="relative w-[17vw] h-[17vh] flex items-center justify-center">
+                  <img src={imgSrc} alt="Player State" className="w-full h-full object-contain" />
+                  {(
+                    <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-white px-4 py-2 text-2xl flex flex-col items-center">
+                      <div className='font-bold text-3xl'>{idx + 1}</div>
+                      <div>{overlay}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
 
-          <div className="col-start-7 col-end-9 row-start-2 row-end-4 flex items-center justify-center z-10">
-            <img src="/assets/btn4.png" alt="Side Design" className="w-[17vw] h-[17vh] object-contain" />
-          </div>
-          <div className="col-start-7 col-end-8 row-start-4 row-end-7 flex items-center justify-center z-10">
-            <img src="/assets/btn5.png" alt="Side Design" className="w-[17vw] h-[17vh] object-contain" />
-          </div>
-          <div className="col-start-6 col-end-7 row-start-6 row-end-8 flex items-center justify-center z-10">
-            <img src="/assets/btn6.png" alt="Side Design" className="w-[17vw] h-[17vh] object-contain" />
-          </div>
           <div className="col-start-5 col-end-6 row-start-2 row-end-3 flex flex-col items-center justify-center z-10">
-            {/* <img src="/assets/btn6.png" alt="Side Design" className="w-[17vw] h-[17vh] object-contain" /> */}
-            <div className='text-4xl text-yellow-500' >Dealer</div>
-            <div className='text-2xl text-yellow-500' >Table : {gameState.table_number}</div>
+            <div className='text-4xl text-yellow-500'>Dealer</div>
+            <div className='flex items-center justify-center text-2xl text-yellow-500 whitespace-nowrap'>
+              Table : {gameState.table_number}
+            </div>
           </div>
           <footer className="col-start-1 col-end-10 row-start-8 row-end-10 flex justify-center items-center relative">
             <img
@@ -61,7 +107,7 @@ const StatsPage = () => {
               alt="Wood Background"
               className="absolute inset-0 w-full h-full object-cover rotate-180 z-0"
             />
-            <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+            <div className="relative top-4 flex flex-col items-center justify-center z-10">
               <div className="text-4xl text-yellow-500">Bets</div>
               <div className="text-2xl text-yellow-500">Max : {gameState.max_bet}</div>
               <div className="text-2xl text-yellow-500">Min : {gameState.min_bet}</div>
