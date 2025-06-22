@@ -7,6 +7,7 @@ import CardSelector from '@/components/CardSelector';
 import Notification from '@/components/Notification';
 import ControlPanelPopup from '@/components/ControlPanelPopup';
 import Navbar from '@/components/Header';
+import { IP } from "@/ip";
 
 export default function DealerView() {
   const { gameState, sendMessage, isConnected, notifications, removeNotification } = useWebSocket();
@@ -189,7 +190,7 @@ export default function DealerView() {
       }
     };
 
-    const ws = new WebSocket('ws://192.168.2.190:6789');
+    const ws = new WebSocket(`ws://${IP}:6789`);
     ws.addEventListener('message', handleMessage);
     return () => ws.removeEventListener('message', handleMessage);
   }, []);

@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { NotificationType } from '@/components/Notification';
+import { IP } from '@/ip';
 
 interface Notification {
   id: string;
@@ -135,7 +136,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     let reconnectTimeout: NodeJS.Timeout;
 
     const connect = () => {
-      websocket = new WebSocket('ws://192.168.2.190:6789');
+      websocket = new WebSocket(`ws://${IP}:6789`);
 
       websocket.onopen = () => {
         console.log('Connected to WebSocket');

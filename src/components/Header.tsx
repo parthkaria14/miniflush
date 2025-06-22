@@ -12,7 +12,7 @@ const Navbar: React.FC<NavbarProps> = ({
   onActivatePlayer,
   activePlayers = [] 
 }) => {
-  const { gameState } = useWebSocket();
+  const { gameState, sendMessage } = useWebSocket();
 
   return (
     <nav className="relative h-[15vh] w-full overflow-hidden">
@@ -63,11 +63,29 @@ const Navbar: React.FC<NavbarProps> = ({
             })}
           </div>
 
+          <div className="flex flex-col">
+          <button
+              className=" bg-white relative flex items-center justify-center cursor-pointer"
+              onClick={() => sendMessage({ action: 'reveal_hands' })}
+              // onTouchEnd={() => sendMessage({ action: 'reveal_hands' })}
+            >
+              Reveal hands
+          </button>
+          <button
+              className=" bg-white relative flex items-center justify-center cursor-pointer"
+              onClick={onOpenControlPanel}
+              // onTouchEnd={() => sendMessage({ action: 'reveal_hands' })}
+            >
+              menu
+          </button>
+          </div>
+          
+
           {/* Right Logo */}
           <div
             className="w-32 h-32 relative flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"
-            // onClick={onOpenControlPanel} 
-            onTouchEnd={onOpenControlPanel}
+            onClick={onOpenControlPanel} 
+            // onTouchEnd={onOpenControlPanel}
           >
             <Image
               src="/assets/menu.png"

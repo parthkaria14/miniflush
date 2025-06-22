@@ -162,8 +162,8 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
           style={{ backgroundColor: '#F0DEAD' }}
         >
           <button
-            // onClick={onClose}
-            onTouchEnd={onClose}
+            onClick={onClose}
+            // onTouchEnd={onClose}
             className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl font-bold focus:outline-none"
             aria-label="Close"
           >
