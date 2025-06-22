@@ -156,7 +156,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-start justify-center bg-black bg-opacity-60 overflow-y-auto p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 overflow-y-auto p-4">
         <div
           className="rounded-lg shadow-lg p-8 relative min-w-[320px] min-h-[200px] max-w-[90vw] my-8 flex flex-col items-center justify-center"
           style={{ backgroundColor: '#F0DEAD' }}
