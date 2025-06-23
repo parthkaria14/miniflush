@@ -25,9 +25,15 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
 
   const handleModeChange = (mode: 'automatic' | 'manual' | 'live') => {
     setSelectedMode(mode);
-    onModeChange(mode);
-    onClose();
+    if(mode !== 'automatic'){
+      onModeChange('manual');
+    }
   };
+  
+  const startAutomatic = () => {
+    onModeChange('automatic');
+    onClose();
+  }
 
   const handleResetTableAndClose = () => {
     onResetGame()
@@ -173,7 +179,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
             <button
               className="px-3 py-1.5 rounded-lg text-xl font-semibold shadow text-white transition-colors"
               style={{ width: 166, height: 49, backgroundColor: selectedMode === 'live' ? '#741003' : '#911606' }}
-              onClick={() => handleModeChange('manual')}
+              onClick={() => handleModeChange('live')}
             >
               Live Mode
             </button>
@@ -192,7 +198,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
               Manual Mode
             </button>
           </div>
-          {selectedMode === 'manual' ? (
+          {selectedMode === 'live' ? (
             <div className="flex flex-row w-full gap-6 justify-center items-center">
               {/* First column */}
               <div className="flex-1 flex flex-col items-center gap-4 mt-20">
@@ -358,10 +364,65 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
                 </div>
               </div>
             </div>
+          ) : selectedMode === 'manual' ? (
+            <div className="flex flex-col items-center justify-center w-full h-full mt-4">
+              <div className="grid grid-cols-3 grid-rows-3 w-fit">
+                <div className="bg-[#D6AB5D] h-28 w-52 row-start-1 row-end-1 col-start-2 col-end-2 m-2 rounded-lg flex flex-col justify-center items-center">
+                  <div className="text-lg font-bold mb-2 text-[#911606] ">Dealer</div>
+                  <div className="flex flex-row gap-2">
+                    <button className="px-4 rounded bg-[#741003] text-[#F0DEAD]">WIN</button>
+                    <button className="px-4 py-2 rounded bg-[#F0DEAD]">LOSE</button>
+                  </div>
+                </div>
+                <div className="bg-[#911606] h-28 w-52 row-start-2 row-end-2 col-start-1 col-end-1 m-2 rounded-lg flex flex-col justify-center items-center">
+                  <div className="text-lg font-bold mb-2 text-[#F0DEAD] ">Player 1</div>
+                  <div className="flex flex-row gap-2">
+                    <button className="px-4 rounded text-[#741003] bg-[#F0DEAD]">WIN</button>
+                    <button className="px-4 py-2 rounded bg-[#450A03] text-[#F0DEAD]">LOSE</button>
+                  </div>
+                </div>
+                <div className="bg-[#911606] h-28 w-52 row-start-2 row-end-2 col-start-2 col-end-2 m-2 rounded-lg flex flex-col justify-center items-center">
+                  <div className="text-lg font-bold mb-2 text-[#F0DEAD] ">Player 2</div>
+                  <div className="flex flex-row gap-2">
+                    <button className="px-4 rounded text-[#741003] bg-[#F0DEAD]">WIN</button>
+                    <button className="px-4 py-2 rounded bg-[#450A03] text-[#F0DEAD]">LOSE</button>
+                  </div>
+                </div>
+                <div className="bg-[#911606] h-28 w-52 row-start-2 row-end-2 col-start-3 col-end-3 m-2 rounded-lg flex flex-col justify-center items-center">
+                  <div className="text-lg font-bold mb-2 text-[#F0DEAD] ">Player 3</div>
+                  <div className="flex flex-row gap-2">
+                    <button className="px-4 rounded text-[#741003] bg-[#F0DEAD]">WIN</button>
+                    <button className="px-4 py-2 rounded bg-[#450A03] text-[#F0DEAD]">LOSE</button>
+                  </div>
+                </div>
+                <div className="bg-[#911606] h-28 w-52 row-start-3 row-end-3 col-start-1 col-end-1 m-2 rounded-lg flex flex-col justify-center items-center">
+                  <div className="text-lg font-bold mb-2 text-[#F0DEAD] ">Player 4</div>
+                  <div className="flex flex-row gap-2">
+                    <button className="px-4 rounded text-[#741003] bg-[#F0DEAD]">WIN</button>
+                    <button className="px-4 py-2 rounded bg-[#450A03] text-[#F0DEAD]">LOSE</button>
+                  </div>
+                </div>
+                <div className="bg-[#911606] h-28 w-52 row-start-3 row-end-3 col-start-2 col-end-2 m-2 rounded-lg flex flex-col justify-center items-center">
+                  <div className="text-lg font-bold mb-2 text-[#F0DEAD] ">Player 5</div>
+                  <div className="flex flex-row gap-2">
+                    <button className="px-4 rounded text-[#741003] bg-[#F0DEAD]">WIN</button>
+                    <button className="px-4 py-2 rounded bg-[#450A03] text-[#F0DEAD]">LOSE</button>
+                  </div>
+                </div>
+                <div className="bg-[#911606] h-28 w-52 row-start-3 row-end-3 col-start-3 col-end-3 m-2 rounded-lg flex flex-col justify-center items-center">
+                  <div className="text-lg font-bold mb-2 text-[#F0DEAD] ">Player 6</div>
+                  <div className="flex flex-row gap-2">
+                    <button className="px-4 rounded text-[#741003] bg-[#F0DEAD]">WIN</button>
+                    <button className="px-4 py-2 rounded bg-[#450A03] text-[#F0DEAD]">LOSE</button>
+                  </div>
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="flex flex-col items-center justify-center w-full h-full">
               <button
-                className="px-5 py-3 rounded-lg text-xl font-bold shadow text-white bg-[#911606] hover:bg-[#741003] transition-colors"
+                className="m-4 px-5 py-3 rounded-lg text-xl font-bold shadow text-white bg-[#911606] hover:bg-[#741003] transition-colors"
+                onClick={startAutomatic}
               >
                 Start automatic
               </button>

@@ -6,6 +6,7 @@ import PlayerHand from '@/components/PlayerHand';
 import Notification from '@/components/Notification';
 import Client_Navbar from '@/components/Client_NavBar';
 import WinnerModal from '@/components/WinnerModal';
+import Footer from '@/components/Footer';
 
 interface Player {
   hand: string[];
@@ -163,21 +164,22 @@ export default function PlayerView() {
     .map(([id]) => id);
 
   return (
-    <div className="min-h-screen bg-[#450A03] }">
+    <div className="min-h-screen flex flex-col bg-[#450A03]">
       <Client_Navbar/>
-      <div className="m-3 poko p-2 bg-[#911606] flex justify-center" style={{ border: '10px solid #D6AB5D' }}>
+      <div className="flex-1 m-3 poko p-2 bg-[#911606] flex justify-center" style={{ border: '10px solid #D6AB5D' }}>
         <div className="mx-auto">
-          {/* Connection Status */}
-          <div className="">
-            {/* <div className={`inline-block px-3 py-1 rounded-full text-sm ${
-              isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-            }`}>
-              {isConnected ? 'Connected' : 'Disconnected'}
-            </div> */}
+          <div className="m-4 text-center">
+            <span className="inline-block px-4 py-2 text-yellow-500 text-5xl rounded-lg">
+              {(() => {
+                if (!currentPlayerId) return '';
+                const match = currentPlayerId.match(/^player(\d)$/i);
+                return match ? `PLAYER ${match[1]}` : currentPlayerId.toUpperCase();
+              })()}
+            </span>
           </div>
 
           {/* Game Phase */}
-          <div className="mb-2 text-center">
+          <div className="m-4 text-center">
             <span className="inline-block px-4 py-2 bg-[#741003] text-white text-sm rounded-lg">
               {gameState?.game_phase ? 
                 gameState.game_phase.charAt(0).toUpperCase() + gameState.game_phase.slice(1) : 
@@ -298,15 +300,16 @@ export default function PlayerView() {
               )}
             </div>
           )}
+
+          {/* Winner Modal */}
+          <WinnerModal 
+            show={showWinnerModal} 
+            onClose={() => setShowWinnerModal(false)} 
+            winner={winner} 
+          />
         </div>
       </div>
-
-      {/* Winner Modal */}
-      <WinnerModal 
-        show={showWinnerModal} 
-        onClose={() => setShowWinnerModal(false)} 
-        winner={winner} 
-      />
+      <Footer />
     </div>
   );
 }

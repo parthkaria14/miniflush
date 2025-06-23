@@ -53,9 +53,9 @@ const Client_Navbar: React.FC<Client_NavbarProps> = ({
               height={75}  
               className="object-contain"
             />
-            <div className="text-white text-xl mt-2">
-              {playerId} {/*here*/}
-            </div>
+            {/* <div className="text-white text-xl mt-2">
+              {playerId}
+            </div> */}
           </div>
 
           {/* Right Logo */}

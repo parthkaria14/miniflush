@@ -44,26 +44,26 @@ const WinnerModal = ({ show, onClose, winner }: { show: boolean; onClose: () => 
             animate={{ scale: 1 }}
             exit={{ scale: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md flex flex-col items-center text-black"
+            className="bg-white rounded-2xl shadow-lg p-12 w-full max-w-2xl flex flex-col items-center text-black"
           >
            
-            <div className="text-4xl font-bold text-gray-800 text-center mb-4">
+            <div className="text-7xl font-bold text-gray-800 text-center mb-8">
               
               
             </div>
             <div className="flex items-center justify-center">
               {winner === 0 && (
                 <>
-                <img src="/assets/gg.gif" alt="Player Wins" className="w-28 h-24 mr-4" />
-                <div className="text-4xl font-bold text-gray-800 text-center mb-4 w-full">
+                <img src="/assets/gg.gif" alt="Player Wins" className="w-56 h-48 mr-8" />
+                <div className="text-7xl font-bold text-gray-800 text-center mb-8 w-full">
               YOU WIN!!
               </div>
               </>
               )}
               {winner === 1 && (
                 <>
-                <img src="/assets/gg.gif" alt="Dealer Wins" className="w-28 h-24 mr-4" />
-                <div className="text-4xl font-bold text-gray-800 text-center mb-4 w-full">
+                <img src="/assets/gg.gif" alt="Dealer Wins" className="w-56 h-48 mr-8" />
+                <div className="text-7xl font-bold text-gray-800 text-center mb-8 w-full">
               DEALER WINS!!
               </div>
                 </>
