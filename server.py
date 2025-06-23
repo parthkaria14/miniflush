@@ -86,11 +86,13 @@ LOW_PAYOUTS = {
 }
 
 def save_state():
-    """Saves current game state to history for undo functionality."""
-    global state_history, game_state
+    """Saves current game state to history for undo functionality, including deal order state."""
+    global state_history, game_state, foolproof_deal_state
     
     # Create a deep copy of the current state
     state_copy = copy.deepcopy(game_state)
+    # Attach a copy of the deal state as a dict key
+    state_copy["foolproof_deal_state"] = copy.deepcopy(foolproof_deal_state)
     state_history.append(state_copy)
     
     # Keep only the last MAX_HISTORY states
@@ -310,7 +312,8 @@ async def handle_connection(websocket):
             elif data["action"] == "reveal_hands":
                 await handle_reveal_hands()
             elif data["action"] == "add_card":
-                await handle_add_card(data["card"], data.get("target", "dealer"))
+                # Always use round-robin logic for dealing cards, ignore target
+                await foolproof_deal_card(data["card"])
             elif data["action"] == "bet_changed":
                 await handle_change_bet(data["minBet"], data["maxBet"])
             elif data["action"] == "table_number_set":
@@ -382,12 +385,13 @@ async def handle_shuffle_deck():
 #     })
 
 async def handle_deal_cards():
-    """Deals 3 cards to each active player and dealer."""
+    """Deals cards one by one to each active player (in order), then to the dealer (last), up to 3 cards each, in round-robin fashion."""
     global game_state
     
-    # Count active players
-    active_players = sum(1 for player in game_state["players"].values() if player["active"])
-  
+    # Get list of active players in order, dealer is last
+    active_players = [pid for pid, player in game_state["players"].items() if player["active"]]
+    deal_order = active_players + ["dealer"]  # Dealer is always last
+
     save_state()
     
     # Reset hands and player states
@@ -401,24 +405,21 @@ async def handle_deal_cards():
         for key in ["main_bet_result", "high_bet_result", "low_bet_result", "high_combination", "low_combination"]:
             if key in player:
                 del player[key]
-    
     # Clear dealer data
     for key in ["dealer_combination", "dealer_qualifies"]:
         if key in game_state:
             del game_state[key]
 
-    # Deal 3 cards to dealer
-    for _ in range(3):
-        if game_state["deck"]:
-            game_state["dealer_hand"].append(game_state["deck"].pop(0))
-    
-    # Deal 3 cards to each active player
-    for player_id, player in game_state["players"].items():
-        if player["active"]:
-            for _ in range(3):
-                if game_state["deck"]:
-                    player["hand"].append(game_state["deck"].pop(0))
-    
+    # Deal cards round-robin: 3 rounds
+    for round_num in range(3):
+        for target in deal_order:
+            if target == "dealer":
+                if len(game_state["dealer_hand"]) < 3 and game_state["deck"]:
+                    game_state["dealer_hand"].append(game_state["deck"].pop(0))
+            else:
+                if len(game_state["players"][target]["hand"]) < 3 and game_state["deck"]:
+                    game_state["players"][target]["hand"].append(game_state["deck"].pop(0))
+
     game_state["game_phase"] = "dealing"
     game_state["winners"] = []
     
@@ -552,8 +553,8 @@ async def handle_reset_table():
     })
 
 async def handle_undo_last():
-    """Undoes the last action by restoring previous state."""
-    global game_state, state_history
+    """Undoes the last action by restoring previous state, including deal order state."""
+    global game_state, state_history, foolproof_deal_state
     
     if not state_history:
         await broadcast({
@@ -566,7 +567,19 @@ async def handle_undo_last():
     # Restore the last saved state
     previous_state = state_history.pop()
     game_state = copy.deepcopy(previous_state)
-    
+
+    # Also restore foolproof_deal_state if it was saved
+    if "foolproof_deal_state" in previous_state:
+        foolproof_deal_state = copy.deepcopy(previous_state["foolproof_deal_state"])
+    else:
+        # Try to reconstruct deal state from hands (fallback)
+        active_players = get_active_player_ids()
+        foolproof_deal_state = {
+            "current_index": 0,
+            "player_cards": {pid: len(game_state["players"][pid]["hand"]) for pid in active_players},
+            "dealer_cards": len(game_state["dealer_hand"])
+        }
+
     print(f"Undid last action. History length: {len(state_history)}")
     
     await broadcast({
@@ -976,43 +989,70 @@ def extract_card_value(input_string):
 def get_active_player_ids():
     return [pid for pid, player in game_state["players"].items() if player["active"]]
 
-# State to track dealing progress
+# State to track dealing progress for foolproof_deal_card
 foolproof_deal_state = {
-    "current_player_index": 0,
+    "current_index": 0,  # round-robin pointer
     "player_cards": {},  # player_id: number of cards dealt
     "dealer_cards": 0
 }
 
-async def foolproof_deal_card(card):
+def get_deal_order():
+    """Returns the current round-robin deal order: all active players (in order), then dealer (last)."""
     active_players = get_active_player_ids()
-    logging.info(f"Received card to deal: {card}")
-    # Initialize player_cards if needed
-    for pid in active_players:
+    return active_players + ["dealer"]  # Dealer is always last
+
+async def foolproof_deal_card(card):
+    deal_order = get_deal_order()
+    n = len(deal_order)
+    logging.info(f"[Deal] Current deal order: {deal_order}")
+    logging.info(f"[Deal] Current round-robin index: {foolproof_deal_state['current_index']}")
+    if n == 0:
+        logging.info("[Deal] No players to deal to.")
+        return
+    # Initialize player_cards for new players
+    for pid in get_active_player_ids():
         if pid not in foolproof_deal_state["player_cards"]:
             foolproof_deal_state["player_cards"][pid] = 0
-            logging.info(f"Initializing card count for {pid}")
     # Remove players who are no longer active
     for pid in list(foolproof_deal_state["player_cards"].keys()):
-        if pid not in active_players:
-            logging.info(f"Removing inactive player from deal state: {pid}")
+        if pid not in get_active_player_ids():
             del foolproof_deal_state["player_cards"][pid]
-    # Deal to players first
-    for pid in active_players:
-        if foolproof_deal_state["player_cards"][pid] < 3:
-            logging.info(f"Dealing card {card} to {pid} (current count: {foolproof_deal_state['player_cards'][pid]})")
-            await handle_add_card(card, pid)
-            foolproof_deal_state["player_cards"][pid] += 1
-            logging.info(f"{pid} now has {foolproof_deal_state['player_cards'][pid]} cards")
+    # Cap dealer_cards at 3
+    if foolproof_deal_state["dealer_cards"] > 3:
+        foolproof_deal_state["dealer_cards"] = 3
+    # Find next eligible recipient in round-robin
+    for _ in range(n):
+        idx = foolproof_deal_state["current_index"] % n
+        target = deal_order[idx]
+        logging.info(f"[Deal] Considering target: {target}")
+        card_dealt = False
+        if target == "dealer":
+            if foolproof_deal_state["dealer_cards"] < 3:
+                logging.info(f"[Deal] Dealing card {card} to dealer (current count: {foolproof_deal_state['dealer_cards']})")
+                # Try to add card, but only advance pointer if not duplicate
+                before = len(game_state["dealer_hand"])
+                await handle_add_card(card, "dealer")
+                after = len(game_state["dealer_hand"])
+                if after > before:
+                    foolproof_deal_state["dealer_cards"] += 1
+                    card_dealt = True
+        else:
+            if foolproof_deal_state["player_cards"].get(target, 0) < 3:
+                logging.info(f"[Deal] Dealing card {card} to {target} (current count: {foolproof_deal_state['player_cards'].get(target, 0)})")
+                before = len(game_state["players"][target]["hand"])
+                await handle_add_card(card, target)
+                after = len(game_state["players"][target]["hand"])
+                if after > before:
+                    foolproof_deal_state["player_cards"][target] += 1
+                    card_dealt = True
+        if card_dealt:
+            foolproof_deal_state["current_index"] = (foolproof_deal_state["current_index"] + 1) % n
             return
-    # Then deal to dealer
-    if foolproof_deal_state["dealer_cards"] < 3:
-        logging.info(f"Dealing card {card} to dealer (current count: {foolproof_deal_state['dealer_cards']})")
-        await handle_add_card(card, "dealer")
-        foolproof_deal_state["dealer_cards"] += 1
-        logging.info(f"Dealer now has {foolproof_deal_state['dealer_cards']} cards")
-        return
-    # If everyone has 3 cards, ignore the card
-    logging.info(f"All players and dealer have 3 cards, ignoring: {card}")
+        else:
+            logging.info(f"[Deal] Card {card} was not dealt to {target} (likely duplicate or error), pointer not advanced.")
+        foolproof_deal_state["current_index"] = foolproof_deal_state["current_index"] % n
+    # If all have 3 cards, ignore the card
+    logging.info(f"[Deal] All players and dealer have 3 cards, ignoring: {card}")
 
 # Replace smart_deal_card with foolproof_deal_card in read_from_serial
 async def read_from_serial():
