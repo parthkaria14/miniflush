@@ -548,7 +548,10 @@ async def handle_reset_table():
             "dealer_hand": game_state["dealer_hand"],
             "players": game_state["players"],
             "game_phase": game_state["game_phase"],
-            "winners": game_state["winners"]
+            "winners": game_state["winners"],
+            "table_number": game_state["table_number"],
+            "min_bet": game_state["min_bet"],
+            "max_bet": game_state["max_bet"]
         }
     })
 
