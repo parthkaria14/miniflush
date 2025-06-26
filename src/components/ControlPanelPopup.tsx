@@ -377,43 +377,43 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
                 <div className="bg-[#911606] h-28 w-52 row-start-2 row-end-2 col-start-1 col-end-1 m-2 rounded-lg flex flex-col justify-center items-center">
                   <div className="text-lg font-bold mb-2 text-[#F0DEAD] ">Player 1</div>
                   <div className="flex flex-row gap-2">
-                    <button className="px-4 rounded text-[#741003] bg-[#F0DEAD]">WIN</button>
-                    <button className="px-4 py-2 rounded bg-[#450A03] text-[#F0DEAD]">LOSE</button>
+                    <button className="px-4 rounded text-[#741003] bg-[#F0DEAD]" onClick={() => sendMessage({ action: 'manual_set_result', player: 'player1', result: 'win' })}>WIN</button>
+                    <button className="px-4 py-2 rounded bg-[#450A03] text-[#F0DEAD]" onClick={() => sendMessage({ action: 'manual_set_result', player: 'player1', result: 'lose' })}>LOSE</button>
                   </div>
                 </div>
                 <div className="bg-[#911606] h-28 w-52 row-start-2 row-end-2 col-start-2 col-end-2 m-2 rounded-lg flex flex-col justify-center items-center">
                   <div className="text-lg font-bold mb-2 text-[#F0DEAD] ">Player 2</div>
                   <div className="flex flex-row gap-2">
-                    <button className="px-4 rounded text-[#741003] bg-[#F0DEAD]">WIN</button>
-                    <button className="px-4 py-2 rounded bg-[#450A03] text-[#F0DEAD]">LOSE</button>
+                    <button className="px-4 rounded text-[#741003] bg-[#F0DEAD]" onClick={() => sendMessage({ action: 'manual_set_result', player: 'player2', result: 'win' })}>WIN</button>
+                    <button className="px-4 py-2 rounded bg-[#450A03] text-[#F0DEAD]" onClick={() => sendMessage({ action: 'manual_set_result', player: 'player2', result: 'lose' })}>LOSE</button>
                   </div>
                 </div>
                 <div className="bg-[#911606] h-28 w-52 row-start-2 row-end-2 col-start-3 col-end-3 m-2 rounded-lg flex flex-col justify-center items-center">
                   <div className="text-lg font-bold mb-2 text-[#F0DEAD] ">Player 3</div>
                   <div className="flex flex-row gap-2">
-                    <button className="px-4 rounded text-[#741003] bg-[#F0DEAD]">WIN</button>
-                    <button className="px-4 py-2 rounded bg-[#450A03] text-[#F0DEAD]">LOSE</button>
+                    <button className="px-4 rounded text-[#741003] bg-[#F0DEAD]" onClick={() => sendMessage({ action: 'manual_set_result', player: 'player3', result: 'win' })}>WIN</button>
+                    <button className="px-4 py-2 rounded bg-[#450A03] text-[#F0DEAD]" onClick={() => sendMessage({ action: 'manual_set_result', player: 'player3', result: 'lose' })}>LOSE</button>
                   </div>
                 </div>
                 <div className="bg-[#911606] h-28 w-52 row-start-3 row-end-3 col-start-1 col-end-1 m-2 rounded-lg flex flex-col justify-center items-center">
                   <div className="text-lg font-bold mb-2 text-[#F0DEAD] ">Player 4</div>
                   <div className="flex flex-row gap-2">
-                    <button className="px-4 rounded text-[#741003] bg-[#F0DEAD]">WIN</button>
-                    <button className="px-4 py-2 rounded bg-[#450A03] text-[#F0DEAD]">LOSE</button>
+                    <button className="px-4 rounded text-[#741003] bg-[#F0DEAD]" onClick={() => sendMessage({ action: 'manual_set_result', player: 'player4', result: 'win' })}>WIN</button>
+                    <button className="px-4 py-2 rounded bg-[#450A03] text-[#F0DEAD]" onClick={() => sendMessage({ action: 'manual_set_result', player: 'player4', result: 'lose' })}>LOSE</button>
                   </div>
                 </div>
                 <div className="bg-[#911606] h-28 w-52 row-start-3 row-end-3 col-start-2 col-end-2 m-2 rounded-lg flex flex-col justify-center items-center">
                   <div className="text-lg font-bold mb-2 text-[#F0DEAD] ">Player 5</div>
                   <div className="flex flex-row gap-2">
-                    <button className="px-4 rounded text-[#741003] bg-[#F0DEAD]">WIN</button>
-                    <button className="px-4 py-2 rounded bg-[#450A03] text-[#F0DEAD]">LOSE</button>
+                    <button className="px-4 rounded text-[#741003] bg-[#F0DEAD]" onClick={() => sendMessage({ action: 'manual_set_result', player: 'player5', result: 'win' })}>WIN</button>
+                    <button className="px-4 py-2 rounded bg-[#450A03] text-[#F0DEAD]" onClick={() => sendMessage({ action: 'manual_set_result', player: 'player5', result: 'lose' })}>LOSE</button>
                   </div>
                 </div>
                 <div className="bg-[#911606] h-28 w-52 row-start-3 row-end-3 col-start-3 col-end-3 m-2 rounded-lg flex flex-col justify-center items-center">
                   <div className="text-lg font-bold mb-2 text-[#F0DEAD] ">Player 6</div>
                   <div className="flex flex-row gap-2">
-                    <button className="px-4 rounded text-[#741003] bg-[#F0DEAD]">WIN</button>
-                    <button className="px-4 py-2 rounded bg-[#450A03] text-[#F0DEAD]">LOSE</button>
+                    <button className="px-4 rounded text-[#741003] bg-[#F0DEAD]" onClick={() => sendMessage({ action: 'manual_set_result', player: 'player6', result: 'win' })}>WIN</button>
+                    <button className="px-4 py-2 rounded bg-[#450A03] text-[#F0DEAD]" onClick={() => sendMessage({ action: 'manual_set_result', player: 'player6', result: 'lose' })}>LOSE</button>
                   </div>
                 </div>
               </div>

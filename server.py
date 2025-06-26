@@ -341,6 +341,26 @@ async def handle_connection(websocket):
                     data.get("max_bet"), 
                     data.get("table_number")
                 )
+            elif data["action"] == "manual_set_result":
+                player_id = data.get("player")
+                result = data.get("result")
+                if player_id in game_state["players"] and result in ["win", "lose"]:
+                    # Save state before making changes
+                    save_state()
+                    game_state["players"][player_id]["result"] = result
+                    game_state["game_phase"] = "revealed"
+                    await broadcast({
+                        "action": "update_game",
+                        "game_state": {
+                            "dealer_hand": game_state["dealer_hand"],
+                            "players": game_state["players"],
+                            "game_phase": game_state["game_phase"],
+                            "winners": game_state["winners"],
+                            "min_bet": game_state["min_bet"],
+                            "max_bet": game_state["max_bet"],
+                            "table_number": game_state["table_number"]
+                        }
+                    })
 
     except websockets.ConnectionClosed:
         print(f"Client disconnected: {websocket.remote_address}")
