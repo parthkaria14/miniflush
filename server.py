@@ -536,7 +536,7 @@ async def handle_remove_player(player_id):
 
 async def handle_reset_table():
     """Resets the entire game state."""
-    global game_state, state_history
+    global game_state, state_history, foolproof_deal_state
     
     # Save state before making changes
     save_state()
@@ -561,6 +561,13 @@ async def handle_reset_table():
     game_state["winners"] = []
     game_state["current_dealing_player"] = None
     game_state["cards_dealt"] = 0
+
+    # Reset the round robin queue (foolproof_deal_state)
+    foolproof_deal_state = {
+        "current_index": 0,
+        "player_cards": {},
+        "dealer_cards": 0
+    }
     
     await broadcast({
         "action": "table_reset",
