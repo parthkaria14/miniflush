@@ -376,7 +376,7 @@ export default function DealerView() {
               >
                 <span className="text-xl font-bold">Reveal Hands</span>
                 {!allPlayersActed && activePlayers.length > 0 && (
-                  <span className="text-xs font-normal mt-1 text-gray-700">{`(${activePlayers.filter(p => !p.has_acted).length} players remaining)`}</span>
+                  <span className={`text-xs font-normal mt-1 ${(!isConnected || isLoading || !allPlayersActed) ? 'text-[#741003]' : 'text-gray-700'}`}>{`(${activePlayers.filter(p => !p.has_acted).length} players remaining)`}</span>
                 )}
               </button>
             </div>

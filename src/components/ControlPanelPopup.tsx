@@ -199,26 +199,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
             </button>
           </div>
           {selectedMode === 'live' ? (
-            <div className="flex flex-row w-full gap-6 justify-center items-center">
-              {/* First column */}
-              <div className="flex-1 flex flex-col items-center gap-4 mt-20">
-                <button
-                  key="dealer wins"
-                  className="rounded-lg shadow text-xl font-bold flex items-center justify-center"
-                  style={{ width: 250, height: 60, backgroundColor: '#911606', color: '#fff' }}
-                >
-                  Dealer wins
-                </button>
-                {[2,3,4,5,6,7].map(num => (
-                  <button
-                    key={num}
-                    className="rounded-lg shadow text-xl font-bold flex items-center justify-center"
-                    style={{ width: 250, height: 60, backgroundColor: '#911606', color: '#fff' }}
-                  >
-                    Player {num-1} wins
-                  </button>
-                ))}
-              </div>
+            <div className="flex flex-row w-full gap-6 justify-center items-center mt-8">
               {/* Second column */}
               <div className="flex-1 flex flex-col h-full min-h-full">
                 <div className="flex flex-col items-center gap-2 mb-16">
@@ -357,7 +338,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
               </div>
             </div>
           ) : selectedMode === 'manual' ? (
-            <div className="flex flex-col items-center justify-center w-full h-full mt-4">
+            <div className="flex flex-col items-center justify-center w-full h-full mt-8">
               <div className="grid grid-cols-3 grid-rows-3 w-fit">
                 <div className="bg-[#D6AB5D] h-28 w-52 row-start-1 row-end-1 col-start-2 col-end-2 m-2 rounded-lg flex flex-col justify-center items-center">
                   <div className="text-lg font-bold mb-2 text-[#911606] ">Dealer</div>

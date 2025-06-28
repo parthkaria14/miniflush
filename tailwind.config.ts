@@ -1,4 +1,4 @@
-cdimport type { Config } from 'tailwindcss'
+import type { Config } from 'tailwindcss'
 
 const config: Config = {
   content: [
