@@ -223,14 +223,6 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
               <div className="flex-1 flex flex-col h-full min-h-full">
                 <div className="flex flex-col items-center gap-2 mb-16">
                   <button
-                    key="reset-hand"
-                    className="rounded-lg shadow text-xl font-bold flex items-center justify-center"
-                    style={{ width: 250, height: 49, backgroundColor: '#fff', color: '#741003' }}
-                    onClick={handleRevealAndClose}
-                  >
-                    Reveal hand
-                  </button>
-                  <button
                     key="undo-last"
                     className="rounded-lg shadow text-xl font-bold flex items-center justify-center"
                     style={{ width: 250, height: 49, backgroundColor: '#fff', color: '#741003' }}

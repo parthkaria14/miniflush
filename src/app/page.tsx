@@ -361,6 +361,25 @@ export default function DealerView() {
               has_acted={false}
               action_type={null}
             />
+            
+            {/* Reveal Hands Button */}
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={handleRevealHands}
+                className={`rounded-lg shadow text-xl font-bold flex flex-col items-center justify-center transition-all duration-200 ${
+                  (!isConnected || isLoading || !allPlayersActed) 
+                    ? 'bg-[#D6AB5D] text-[#741003] cursor-not-allowed' 
+                    : 'bg-white text-[#741003] hover:bg-gray-100 hover:scale-105'
+                }`}
+                style={{ width: 250, minHeight: 56, padding: '8px 0' }}
+                disabled={!isConnected || isLoading || !allPlayersActed}
+              >
+                <span className="text-xl font-bold">Reveal Hands</span>
+                {!allPlayersActed && activePlayers.length > 0 && (
+                  <span className="text-xs font-normal mt-1 text-gray-700">{`(${activePlayers.filter(p => !p.has_acted).length} players remaining)`}</span>
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Player Hands */}
