@@ -343,8 +343,12 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
                 <div className="bg-[#D6AB5D] h-28 w-52 row-start-1 row-end-1 col-start-2 col-end-2 m-2 rounded-lg flex flex-col justify-center items-center">
                   <div className="text-lg font-bold mb-2 text-[#911606] ">Dealer</div>
                   <div className="flex flex-row gap-2">
-                    <button className="px-4 rounded bg-[#741003] text-[#F0DEAD]">WIN</button>
-                    <button className="px-4 py-2 rounded bg-[#F0DEAD]">LOSE</button>
+                    <button
+                      className="px-4 py-2 rounded bg-[#741003] text-[#F0DEAD] font-bold text-xl"
+                      onClick={() => sendMessage({ action: 'broadcast_ante' })}
+                    >
+                      ANTE
+                    </button>
                   </div>
                 </div>
                 <div className="bg-[#911606] h-28 w-52 row-start-2 row-end-2 col-start-1 col-end-1 m-2 rounded-lg flex flex-col justify-center items-center">

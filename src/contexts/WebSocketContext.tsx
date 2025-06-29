@@ -44,6 +44,8 @@ interface WebSocketContextType {
   notifications: Notification[];
   addNotification: (message: string, type: NotificationType) => void;
   removeNotification: (id: string) => void;
+  registerActionHandler?: (action: string, handler: (data: any) => void) => void;
+  unregisterActionHandler?: (action: string, handler: (data: any) => void) => void;
 }
 
 const defaultGameState: GameState = {
@@ -74,6 +76,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [isConnected, setIsConnected] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [previousGameState, setPreviousGameState] = useState<GameState | null>(null);
+  const actionHandlers = React.useRef<{ [action: string]: Set<(data: any) => void> }>({});
 
   const addNotification = (message: string, type: NotificationType) => {
     const id = Math.random().toString(36).substr(2, 9);
@@ -82,6 +85,15 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const removeNotification = (id: string) => {
     setNotifications(prev => prev.filter(notification => notification.id !== id));
+  };
+
+  const registerActionHandler = (action: string, handler: (data: any) => void) => {
+    if (!actionHandlers.current[action]) actionHandlers.current[action] = new Set();
+    actionHandlers.current[action].add(handler);
+  };
+
+  const unregisterActionHandler = (action: string, handler: (data: any) => void) => {
+    actionHandlers.current[action]?.delete(handler);
   };
 
   const determineUndoneAction = (oldState: GameState, newState: GameState): string => {
@@ -168,6 +180,10 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         try {
           const data = JSON.parse(event.data);
           
+          // Custom action handlers
+          if (data.action && actionHandlers.current[data.action]) {
+            actionHandlers.current[data.action].forEach(fn => fn(data));
+          }
           switch (data.action) {
             case 'update_game':
             case 'cards_dealt':
@@ -281,7 +297,9 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       isConnected,
       notifications,
       addNotification,
-      removeNotification
+      removeNotification,
+      registerActionHandler,
+      unregisterActionHandler
     }}>
       {children}
     </WebSocketContext.Provider>

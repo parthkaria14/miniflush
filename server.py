@@ -347,6 +347,9 @@ async def handle_connection(websocket):
                 if player_id in game_state["players"] and result in ["win", "lose"]:
                     # Save state before making changes
                     save_state()
+                    # Clear all results first
+                    for pid in game_state["players"]:
+                        game_state["players"][pid]["result"] = None
                     game_state["players"][player_id]["result"] = result
                     game_state["game_phase"] = "revealed"
                     await broadcast({
@@ -361,6 +364,8 @@ async def handle_connection(websocket):
                             "table_number": game_state["table_number"]
                         }
                     })
+            elif data["action"] == "broadcast_ante":
+                await broadcast({ "action": "show_ante_popup" })
 
     except websockets.ConnectionClosed:
         print(f"Client disconnected: {websocket.remote_address}")
@@ -500,8 +505,13 @@ async def handle_add_player(player_id=None):
                 "message": f"{player_id} is already active"
             })
             return
-            
+        
         game_state["players"][player_id]["active"] = True
+        
+        # If the game is in revealed phase, clear all results to prevent stale modals
+        if game_state["game_phase"] == "revealed":
+            for pid in game_state["players"]:
+                game_state["players"][pid]["result"] = None
         
         await broadcast({
             "action": "player_added",

@@ -7,6 +7,7 @@ import Notification from '@/components/Notification';
 import Client_Navbar from '@/components/Client_NavBar';
 import WinnerModal from '@/components/WinnerModal';
 import Footer from '@/components/Footer';
+import AnteModal from '@/components/AnteModal';
 
 interface Player {
   hand: string[];
@@ -25,7 +26,7 @@ interface Player {
 }
 
 export default function PlayerView() {
-  const { gameState, sendMessage, isConnected } = useWebSocket();
+  const { gameState, sendMessage, isConnected, ws, registerActionHandler, unregisterActionHandler } = useWebSocket();
   const [hasSurrendered, setHasSurrendered] = useState(false);
   const [showDealerCards, setShowDealerCards] = useState(false);
   const [showPlayerCards, setShowPlayerCards] = useState(false);
@@ -33,6 +34,7 @@ export default function PlayerView() {
   const [currentPlayerId, setCurrentPlayerId] = useState<string | null>(null);
   const [showWinnerModal, setShowWinnerModal] = useState(false);
   const [winner, setWinner] = useState<number | null>(null);
+  const [showAnteModal, setShowAnteModal] = useState(false);
 
   // Get current player ID from URL
   useEffect(() => {
@@ -162,6 +164,16 @@ export default function PlayerView() {
   const waitingPlayers = Object.entries(gameState.players)
     .filter(([_, player]) => (player as Player).active && !(player as Player).has_acted && (player as Player).action_type !== 'surrender')
     .map(([id]) => id);
+
+  useEffect(() => {
+    if (!registerActionHandler || !unregisterActionHandler) return;
+    const handler = () => {
+      setShowAnteModal(true);
+      setTimeout(() => setShowAnteModal(false), 3000);
+    };
+    registerActionHandler('show_ante_popup', handler);
+    return () => unregisterActionHandler('show_ante_popup', handler);
+  }, [registerActionHandler, unregisterActionHandler]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#450A03]">
@@ -307,6 +319,8 @@ export default function PlayerView() {
             onClose={() => setShowWinnerModal(false)} 
             winner={winner} 
           />
+          {/* Ante Modal */}
+          <AnteModal show={showAnteModal} onClose={() => setShowAnteModal(false)} />
         </div>
       </div>
       <Footer />
