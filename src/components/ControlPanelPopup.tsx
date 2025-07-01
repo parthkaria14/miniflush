@@ -212,15 +212,6 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
                     Undo last
                   </button>
                   <button
-                    key="reset-game"
-                    className="rounded-lg shadow text-xl font-bold flex items-center justify-center"
-                    style={{ width: 250, height: 49, backgroundColor: '#fff', color: '#741003' }}
-                    onClick={handleResetTableAndClose}
-                    disabled={!isConnected || isLoading}
-                  >
-                    Reset game
-                  </button>
-                  <button
                     key="delete-last-game"
                     className="rounded-lg shadow text-xl font-bold flex items-center justify-center"
                     style={{ width: 250, height: 49, backgroundColor: '#fff', color: '#741003' }}

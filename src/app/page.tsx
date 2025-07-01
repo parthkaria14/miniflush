@@ -363,7 +363,7 @@ export default function DealerView() {
             />
             
             {/* Reveal Hands Button */}
-            <div className="flex justify-center mt-4">
+            <div className="flex justify-center mt-4 gap-4">
               <button
                 onClick={handleRevealHands}
                 className={`rounded-lg shadow text-xl font-bold flex flex-col items-center justify-center transition-all duration-200 ${
@@ -378,6 +378,18 @@ export default function DealerView() {
                 {!allPlayersActed && activePlayers.length > 0 && (
                   <span className={`text-xs font-normal mt-1 ${(!isConnected || isLoading || !allPlayersActed) ? 'text-[#741003]' : 'text-gray-700'}`}>{`(${activePlayers.filter(p => !p.has_acted).length} players remaining)`}</span>
                 )}
+              </button>
+              <button
+                onClick={handleResetTable}
+                className={`rounded-lg shadow text-xl font-bold flex flex-col items-center justify-center transition-all duration-200 ${
+                  (!isConnected || isLoading) 
+                    ? 'bg-[#D6AB5D] text-[#741003] cursor-not-allowed' 
+                    : 'bg-white text-[#741003] hover:bg-gray-100 hover:scale-105'
+                }`}
+                style={{ width: 250, minHeight: 56, padding: '8px 0' }}
+                disabled={!isConnected || isLoading}
+              >
+                <span className="text-xl font-bold">Reset Game</span>
               </button>
             </div>
           </div>
