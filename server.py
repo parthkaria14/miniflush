@@ -983,7 +983,7 @@ async def main():
     # Initialize serial port for shoe reader
     global ser
     try:
-        ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
+        ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=0.5)
         print(f"Connected to shoe reader on {SERIAL_PORT}")
     except serial.SerialException as e:
         print(f"Serial port error: {e}")
