@@ -6,14 +6,14 @@ import time
 import socket
 
 # Path to your venv's python.exe
-VENV_PYTHON = r"D:\Projects\venv\Scripts\python.exe"
+# VENV_PYTHON = r"D:\Projects\venv\Scripts\python.exe"
 
 
 node_proc = None
 python_proc = None
 
 # URL to open
-WEB_URL = "http://192.168.31.60:3000"
+WEB_URL = "http://192.168.2.190:3000"
 
 # Tkinter setup
 root = tk.Tk()
@@ -39,7 +39,8 @@ def start_servers():
         status_node.set("Node App: Already running")
     if python_proc is None or python_proc.poll() is not None:
         python_proc = subprocess.Popen(
-            f'"{VENV_PYTHON}" server.py',
+            # f'"{VENV_PYTHON}" server.py',
+            "python server.py",
             cwd=os.getcwd(),
             shell=True
         )
