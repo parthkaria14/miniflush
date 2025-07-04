@@ -4,6 +4,7 @@ import webbrowser
 import os
 import time
 import socket
+import serial
 
 # Path to your venv's python.exe
 # VENV_PYTHON = r"D:\Projects\venv\Scripts\python.exe"
@@ -25,6 +26,8 @@ status_python = tk.StringVar()
 status_node.set("Node App: Not running")
 status_python.set("Python Server: Not running")
 
+SERIAL_PORT = "COM1"  # Match with server.py
+BAUD_RATE = 9600
 
 def start_servers():
     global node_proc, python_proc
@@ -56,6 +59,16 @@ def is_port_open(port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         return s.connect_ex(('0.0.0.0', port)) == 0 or s.connect_ex(('127.0.0.1', port)) == 0
 
+def close_serial_port():
+    """Close the serial port if it's in use."""
+    try:
+        ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
+        if ser.is_open:
+            ser.close()
+            print(f"Closed {SERIAL_PORT} successfully.")
+    except serial.SerialException as e:
+        print(f"Could not close {SERIAL_PORT}: {e}")
+
 def close_servers():
     global node_proc, python_proc
     if node_proc is not None and node_proc.poll() is None:
@@ -80,6 +93,8 @@ def close_servers():
         status_python.set("Python Server: Stopped")
     else:
         status_python.set("Python Server: Not running")
+    # Close serial port as well
+    close_serial_port()
 
 def on_close():
     close_servers()

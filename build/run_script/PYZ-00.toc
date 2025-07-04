@@ -1,5 +1,9 @@
 ('D:\\Projects\\solunation\\miniflush\\build\\run_script\\PYZ-00.pyz',
- [('_compat_pickle',
+ [('__future__',
+   'C:\\Users\\Parth '
+   'karia\\AppData\\Local\\Programs\\Python\\Python310\\lib\\__future__.py',
+   'PYMODULE'),
+  ('_compat_pickle',
    'C:\\Users\\Parth '
    'karia\\AppData\\Local\\Programs\\Python\\Python310\\lib\\_compat_pickle.py',
    'PYMODULE'),
@@ -62,6 +66,18 @@
   ('csv',
    'C:\\Users\\Parth '
    'karia\\AppData\\Local\\Programs\\Python\\Python310\\lib\\csv.py',
+   'PYMODULE'),
+  ('ctypes',
+   'C:\\Users\\Parth '
+   'karia\\AppData\\Local\\Programs\\Python\\Python310\\lib\\ctypes\\__init__.py',
+   'PYMODULE'),
+  ('ctypes._endian',
+   'C:\\Users\\Parth '
+   'karia\\AppData\\Local\\Programs\\Python\\Python310\\lib\\ctypes\\_endian.py',
+   'PYMODULE'),
+  ('ctypes.wintypes',
+   'C:\\Users\\Parth '
+   'karia\\AppData\\Local\\Programs\\Python\\Python310\\lib\\ctypes\\wintypes.py',
    'PYMODULE'),
   ('dataclasses',
    'C:\\Users\\Parth '
@@ -298,6 +314,27 @@
   ('selectors',
    'C:\\Users\\Parth '
    'karia\\AppData\\Local\\Programs\\Python\\Python310\\lib\\selectors.py',
+   'PYMODULE'),
+  ('serial',
+   'D:\\Projects\\venv\\lib\\site-packages\\serial\\__init__.py',
+   'PYMODULE'),
+  ('serial.serialcli',
+   'D:\\Projects\\venv\\lib\\site-packages\\serial\\serialcli.py',
+   'PYMODULE'),
+  ('serial.serialjava',
+   'D:\\Projects\\venv\\lib\\site-packages\\serial\\serialjava.py',
+   'PYMODULE'),
+  ('serial.serialposix',
+   'D:\\Projects\\venv\\lib\\site-packages\\serial\\serialposix.py',
+   'PYMODULE'),
+  ('serial.serialutil',
+   'D:\\Projects\\venv\\lib\\site-packages\\serial\\serialutil.py',
+   'PYMODULE'),
+  ('serial.serialwin32',
+   'D:\\Projects\\venv\\lib\\site-packages\\serial\\serialwin32.py',
+   'PYMODULE'),
+  ('serial.win32',
+   'D:\\Projects\\venv\\lib\\site-packages\\serial\\win32.py',
    'PYMODULE'),
   ('shlex',
    'C:\\Users\\Parth '
