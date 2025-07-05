@@ -59,7 +59,7 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
   return (
     <div className={`rounded-lg bg-[#A42210] min-h-[14vh] border-4 border-[#D6AB5D] border-dashed ${isDealer ? 'w-[61.5vw]' : 'min-w-[30vw] max-w-[61.5vw]'} ${isNextToDeal ? 'ring-4 ring-yellow-500 ring-opacity-100 shadow-[0_0_20px_#D6AB5D]' : ''}`} >
       <div className="flex justify-between items-center">
-        <div>
+        <div className={`w-full h-fit flex ${isDealer ? "justify-center items-center" : '' }`}>
           <h3 className="text-2xl font-semibold text-white ml-2 mt-2">
             {isDealer ? 'Dealer' : playerId.replace(/player(\d+)/i, 'Player $1')}
             {/* {isNextToDeal && (

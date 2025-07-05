@@ -343,7 +343,7 @@ export default function DealerView() {
         </header> */}
 
         <main>
-          <div className="mb-2">
+          <div className="mb-2 flex flex-row gap-2">
             {/* Dealer's Hand */}
             <PlayerHand
               key="dealer"
@@ -363,7 +363,7 @@ export default function DealerView() {
             />
             
             {/* Reveal Hands Button */}
-            <div className="flex justify-center mt-4 gap-4">
+            <div className="flex justify-center gap-4">
               <button
                 onClick={handleRevealHands}
                 className={`rounded-lg shadow text-xl font-bold flex flex-col items-center justify-center transition-all duration-200 ${
