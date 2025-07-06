@@ -2,14 +2,15 @@
 
 import React from 'react';
 import { useWebSocket } from '../../contexts/WebSocketContext';
+import StatsHand from '../../components/StatsHand';
 
 const playerGrid = [
   // [playerId, gridClass]
   ['player1', 'col-start-2 col-end-4 row-start-2 row-end-4 flex items-center justify-center z-10'],
-  ['player2', 'col-start-3 col-end-4 row-start-4 row-end-7 flex items-center justify-center z-10'],
+  ['player2', 'col-start-3 col-end-4 row-start-4 row-end-7 flex items-center justify-center z-10 mb-16'],
   ['player3', 'col-start-4 col-end-5 row-start-6 row-end-8 flex items-center justify-center z-10'],
   ['player4', 'col-start-6 col-end-7 row-start-6 row-end-8 flex items-center justify-center z-10'],
-  ['player5', 'col-start-7 col-end-8 row-start-4 row-end-7 flex items-center justify-center z-10'],
+  ['player5', 'col-start-7 col-end-8 row-start-4 row-end-7 flex items-center justify-center z-10 mb-16'],
   ['player6', 'col-start-7 col-end-9 row-start-2 row-end-4 flex items-center justify-center z-10'],
 ];
 
@@ -82,18 +83,30 @@ const StatsPage = () => {
             const overlay = stateToOverlay[state as keyof typeof stateToOverlay];
             return (
               <div key={playerId} className={gridClass}>
-                <div className="relative w-[17vw] h-[17vh] flex items-center justify-center">
-                  <img src={imgSrc} alt="Player State" className="w-full h-full object-contain" />
-                  {(
+                <div className="w-[17vw] h-[17vh] flex flex-row items-center justify-center">
+                  <div>
+                    <StatsHand
+                      playerId={playerId}
+                      hand={player.hand || []}
+                      active={!!player.active}
+                      result={player.result || null}
+                      has_acted={player.has_acted}
+                      action_type={player.action_type}
+                      showCards={true}
+                    />
+                  </div>
+                  <div className="relative w-[8vw] h-[14vh] flex items-center justify-center ml-2">
+                    <img src={imgSrc} alt="Player State" className="w-full h-full object-contain" />
                     <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-white px-4 py-2 text-2xl flex flex-col items-center">
                       <div className='font-bold text-3xl'>{idx + 1}</div>
                       <div>{overlay}</div>
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
             );
           })}
+
 
           <div className="col-start-5 col-end-6 row-start-2 row-end-3 flex flex-col items-center justify-center z-10">
             <div className='text-4xl text-yellow-500'>Dealer</div>
