@@ -7,23 +7,37 @@ interface CardProps {
 }
 
 const Card: React.FC<CardProps> = ({ card, hidden = false }) => {
-  const [isPlayerPage, setIsPlayerPage] = useState(false);
-  const cardSize = isPlayerPage ? 'w-24 h-32 mt-2 mb-2' : 'w-20 h-28';
+  const [currPage, setCurrPage] = useState<'dealer' | 'player' | 'stats'>('stats');
+  let cardSize = '';
+  if (currPage === 'player') {
+    cardSize = 'w-24 h-32 mt-2 mb-2';
+  } else if (currPage === 'dealer') {
+    cardSize = 'w-20 h-28';
+  } else if (currPage === 'stats') {
+    cardSize = 'w-32 h-44';
+  }
   const [isTouched, setIsTouched] = useState(false);
 
   useEffect(() => {
-    setIsPlayerPage(window.location.pathname.includes('/player'));
+    const path = window.location.pathname;
+    if (path.includes('dealer')) {
+      setCurrPage('dealer');
+    } else if (path.includes('player')) {
+      setCurrPage('player');
+    } else {
+      setCurrPage('stats');
+    }
   }, []);
 
   const handleTouchStart = () => {
-    if (isPlayerPage) {
+    if (currPage === 'player') {
       console.log("touched");
       setIsTouched(prev => !prev);
     }
   };
 
   const handleTouchEnd = () => {
-    if (isPlayerPage) {
+    if (currPage === 'player') {
       console.log("untouched");
       setIsTouched(prev => !prev);
     }
@@ -32,7 +46,7 @@ const Card: React.FC<CardProps> = ({ card, hidden = false }) => {
   // If it's an empty slot (card === 'back')
   if (card === 'back') {
     return (
-      <div className={`${cardSize} rounded-lg shadow-md transform`}>
+      <div className={`${cardSize} rounded-lg shadow-2xl transform`}>
         <img 
           src="/cards/card_back.png" 
           alt="Card Back"
