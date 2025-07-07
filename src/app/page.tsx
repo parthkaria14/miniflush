@@ -50,6 +50,7 @@ const stateToOverlay: Partial<Record<'won' | 'lost' | 'ante', string>> = {
 
 const StatsPage = () => {
   const { gameState } = useWebSocket();
+  console.log(gameState)
   return (
     <div className="min-h-screen bg-[#D6AB5D] flex flex-col items-center justify-center">
       <div className="h-[94vh] w-[96vw] m-3 bg-[#971909] flex flex-col">
@@ -156,16 +157,25 @@ const StatsPage = () => {
             </div> */}
             <img src="/assets/ocean7.png" alt="Side Design" className="w-full h-full object-contain" />
           </div>
-          <footer className="col-start-1 col-end-10 row-start-8 row-end-10 flex justify-center items-center relative">
+          <footer className="col-start-1 col-end-10 row-start-8 row-end-10 flex justify-around items-center relative">
             <img
               src="/assets/wood.png"
               alt="Wood Background"
               className="absolute inset-0 w-full h-full object-cover rotate-180 z-0"
             />
             <div className="relative top-4 flex flex-col items-center justify-center z-10">
+              <div className="text-6xl text-yellow-500">Games</div>
+              <div className="text-5xl text-yellow-500">{(gameState.winners || []).length}</div>
+              {/* {console.log(gameState)} */}
+            </div>
+            <div className="relative top-4 flex flex-col items-center justify-center z-10">
               <div className="text-6xl text-yellow-500">Bets</div>
               <div className="text-5xl text-yellow-500">Max : {gameState.max_bet}</div>
               <div className="text-5xl text-yellow-500">Min : {gameState.min_bet}</div>
+            </div>
+            <div className="relative top-4 flex flex-col items-center justify-center z-10">
+              <div className="text-6xl text-yellow-500">Table</div>
+              <div className="text-5xl text-yellow-500">{gameState.table_number}</div>
             </div>
           </footer>
         </div>
