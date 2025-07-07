@@ -39,7 +39,8 @@ export default function PlayerView() {
   // Get current player ID from URL
   useEffect(() => {
     const pathParts = window.location.pathname.split('/');
-    const playerId = pathParts[pathParts.length - 1];
+    const idFromUrl = pathParts[pathParts.length - 1];
+    const playerId = `player${idFromUrl}`;
     setCurrentPlayerId(playerId);
     console.log(`PlayerView: Current Player ID from URL: ${playerId}`); // Debug log
   }, []);

@@ -83,7 +83,7 @@ const StatsPage = () => {
               active={true}
               result={null}
               isDealer={true}
-              showCards={true}
+              showCards={gameState.game_phase === 'revealed'}
               highCombination={gameState.dealer_combination}
               dealerQualifies={gameState.dealer_qualifies}
             />
@@ -105,7 +105,7 @@ const StatsPage = () => {
                       result={player.result || null}
                       has_acted={player.has_acted}
                       action_type={player.action_type}
-                      showCards={true}
+                      showCards={gameState.game_phase === 'revealed'}
                     />
                   </div>
                   <div className="relative w-[8vw] h-[14vh] flex items-center justify-center ml-2">
@@ -142,7 +142,7 @@ const StatsPage = () => {
                       result={player.result || null}
                       has_acted={player.has_acted}
                       action_type={player.action_type}
-                      showCards={true}
+                      showCards={gameState.game_phase === 'revealed'}
                     />
                   </div>
                 </div>
