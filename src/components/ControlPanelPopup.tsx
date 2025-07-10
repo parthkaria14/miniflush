@@ -56,7 +56,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
   }
 
   const handleDeleteGameRecordsAndClose = () => {
-    () => sendMessage({ action: 'clear_records' });
+    sendMessage({ action: 'clear_records' });
     onClose();
   }
 
