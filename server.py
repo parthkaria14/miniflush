@@ -276,19 +276,8 @@ async def handle_connection(websocket):
     connected_clients.add(websocket)
     print(f"Client connected: {websocket.remote_address}")
 
-    # Send current game state to new client
-    await websocket.send(json.dumps({
-        "action": "update_game",
-        "game_state": {
-            "dealer_hand": game_state["dealer_hand"],
-            "players": game_state["players"],
-            "game_phase": game_state["game_phase"],
-            "winners": game_state["winners"],
-            "min_bet": game_state["min_bet"],
-            "max_bet": game_state["max_bet"],
-            "table_number": game_state["table_number"]
-        }
-    }))
+    # Send current game state to new client (with games played count)
+    await broadcast_game_state()
 
     try:
         async for message in websocket:
@@ -311,6 +300,7 @@ async def handle_connection(websocket):
                 await handle_undo_last()
             elif data["action"] == "reveal_hands":
                 await handle_reveal_hands()
+                await broadcast_game_state()  # update games played after a game
             elif data["action"] == "add_card":
                 # Always use round-robin logic for dealing cards, ignore target
                 await foolproof_deal_card(data["card"])
@@ -324,6 +314,7 @@ async def handle_connection(websocket):
                 await delete_all_wins()
             elif data["action"] == "clear_records":
                 await handle_clear_records()
+                await broadcast_game_state()  # update games played after clearing
             elif data["action"] == "start_automatic":
                 await start_automatic()
             elif data["action"] == "start_manual":
@@ -387,6 +378,7 @@ async def handle_shuffle_deck():
         "deck_size": len(game_state["deck"]),
         
     })
+    await broadcast_game_state()
 
 # async def handle_burn_card():
 #     """Burns the top card from the deck."""
@@ -457,6 +449,7 @@ async def handle_deal_cards():
             "deck_size": len(game_state["deck"])
         }
     })
+    await broadcast_game_state()
 
 async def handle_add_player(player_id=None):
     """Activates a player in the game."""
@@ -589,6 +582,7 @@ async def handle_reset_table():
             "table_number": game_state["table_number"],
             "min_bet": game_state["min_bet"],
             "max_bet": game_state["max_bet"]
+            # Do NOT reset games_played here
         }
     })
 
@@ -738,6 +732,7 @@ async def handle_reveal_hands():
             "dealer_combination": game_state["dealer_combination"]
         }
     })
+    await broadcast_game_state()  # update games played after a game
 
 async def handle_add_card(card, target="dealer"):
     """Adds a specific card to dealer or player hand for manual corrections."""
@@ -829,6 +824,7 @@ async def handle_clear_records():
     try:
         await wins_collection.delete_many({})
         await broadcast({"action": "records_cleared", "message": "All game records have been cleared."})
+        # games_played will be updated by broadcast_game_state
     except Exception as e:
         logging.error(f"Error clearing records: {e}")
         await broadcast({"action": "error", "message": "Failed to clear game records."})
@@ -1108,6 +1104,25 @@ async def read_from_serial():
             else:
                 logging.info("No valid card extracted from serial data.")
         await asyncio.sleep(0.01)  # Minimal sleep to yield control
+
+async def get_games_played_count():
+    """Returns the number of games played (number of records in wins_collection)."""
+    return await wins_collection.count_documents({})
+
+async def broadcast_game_state():
+    """Broadcasts the current game state to all clients, including games played count."""
+    games_played = await get_games_played_count()
+    state = {
+        "dealer_hand": game_state["dealer_hand"],
+        "players": game_state["players"],
+        "game_phase": game_state["game_phase"],
+        "winners": game_state["winners"],
+        "min_bet": game_state["min_bet"],
+        "max_bet": game_state["max_bet"],
+        "table_number": game_state["table_number"],
+        "games_played": games_played
+    }
+    await broadcast({"action": "update_game", "game_state": state})
 
 if __name__ == "__main__":
     asyncio.run(main())

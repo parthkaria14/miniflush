@@ -218,7 +218,10 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               break;
             case 'table_reset':
               setPreviousGameState(gameState);
-              setGameState(data.game_state);
+              setGameState(prev => ({
+                ...data.game_state,
+                games_played: data.game_state.games_played !== undefined ? data.game_state.games_played : prev.games_played
+              }));
               break;
             case 'undo_completed':
               if (previousGameState) {

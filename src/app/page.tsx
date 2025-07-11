@@ -165,7 +165,7 @@ const StatsPage = () => {
             />
             <div className="relative top-4 flex flex-col items-center justify-center z-10">
               <div className="text-6xl text-yellow-500">Games</div>
-              <div className="text-5xl text-yellow-500">{(gameState.winners || []).length}</div>
+              <div className="text-5xl text-yellow-500">{gameState.games_played ?? 0}</div>
               {/* {console.log(gameState)} */}
             </div>
             <div className="relative top-4 flex flex-col items-center justify-center z-10">
