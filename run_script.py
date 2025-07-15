@@ -9,14 +9,14 @@ import signal
 import shutil
 
 # Path to your venv's python.exe
-VENV_PYTHON = r"D:\Projects\venv\Scripts\python.exe"
+# VENV_PYTHON = r"D:\Projects\venv\Scripts\python.exe"
 
 
 node_proc = None
 python_proc = None
 
 # URL to open
-WEB_URL = "http://192.168.31.60:3000"
+WEB_URL = "http://192.168.2.190:3000"
 
 # Tkinter setup
 # root = tk.Tk()
@@ -53,13 +53,14 @@ def start_servers():
     global node_proc, python_proc
     if node_proc is None or node_proc.poll() is not None:
         node_proc = subprocess.Popen(
-            "npx next dev --port 3000 --hostname 0.0.0.0",
+            "npx next dev --port 3000 --hostname 0.0.0.0", #change the cmd to your frontend cmd
             cwd=os.getcwd(),
             shell=True
         )
     if python_proc is None or python_proc.poll() is not None:
         python_proc = subprocess.Popen(
-            f'"{VENV_PYTHON}" server.py',
+            # f'"{VENV_PYTHON}" server.py',
+            "python server.py", 
             cwd=os.getcwd(),
             shell=True
         )
