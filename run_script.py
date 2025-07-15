@@ -1,34 +1,54 @@
-import tkinter as tk
 import subprocess
 import webbrowser
 import os
 import time
 import socket
 import serial
+import sys
+import signal
+import shutil
 
 # Path to your venv's python.exe
-# VENV_PYTHON = r"D:\Projects\venv\Scripts\python.exe"
+VENV_PYTHON = r"D:\Projects\venv\Scripts\python.exe"
 
 
 node_proc = None
 python_proc = None
 
 # URL to open
-WEB_URL = "http://192.168.2.190:3000"
+WEB_URL = "http://192.168.31.60:3000"
 
 # Tkinter setup
-root = tk.Tk()
-root.title("Mini Flush Server Control")
-root.geometry("350x220")
+# root = tk.Tk()
+# root.title("Mini Flush Server Control")
+# root.geometry("350x220")
 
-status_node = tk.StringVar()
-status_python = tk.StringVar()
-status_node.set("Node App: Not running")
-status_python.set("Python Server: Not running")
+# status_node = tk.StringVar()
+# status_python = tk.StringVar()
+# status_node.set("Node App: Not running")
+# status_python.set("Python Server: Not running")
 
 SERIAL_PORT = "COM1"  # Match with server.py
 BAUD_RATE = 9600
 
+# --- Chrome detection ---
+def find_chrome_path():
+    # Try to find Chrome in common Windows locations
+    chrome_names = [
+        os.path.join(os.environ.get('PROGRAMFILES', ''), 'Google', 'Chrome', 'Application', 'chrome.exe'),
+        os.path.join(os.environ.get('PROGRAMFILES(X86)', ''), 'Google', 'Chrome', 'Application', 'chrome.exe'),
+        os.path.join(os.environ.get('LOCALAPPDATA', ''), 'Google', 'Chrome', 'Application', 'chrome.exe'),
+    ]
+    for path in chrome_names:
+        if os.path.isfile(path):
+            return path
+    # Try PATH
+    chrome_path = shutil.which('chrome')
+    if chrome_path:
+        return chrome_path
+    return None
+
+# --- Server management ---
 def start_servers():
     global node_proc, python_proc
     if node_proc is None or node_proc.poll() is not None:
@@ -37,19 +57,12 @@ def start_servers():
             cwd=os.getcwd(),
             shell=True
         )
-        status_node.set("Node App: Running")
-    else:
-        status_node.set("Node App: Already running")
     if python_proc is None or python_proc.poll() is not None:
         python_proc = subprocess.Popen(
-            # f'"{VENV_PYTHON}" server.py',
-            "python server.py",
+            f'"{VENV_PYTHON}" server.py',
             cwd=os.getcwd(),
             shell=True
         )
-        status_python.set("Python Server: Running")
-    else:
-        status_python.set("Python Server: Already running")
 
 
 def open_web():
@@ -77,44 +90,62 @@ def close_servers():
             node_proc.wait(timeout=5)
         except subprocess.TimeoutExpired:
             node_proc.kill()
-        time.sleep(1)  # Give OS a moment to release the port
+        time.sleep(1)
         if is_port_open(3000):
-            status_node.set("Node App: Port still in use!")
+            print("Node App: Port still in use!")
         else:
-            status_node.set("Node App: Stopped")
-    else:
-        status_node.set("Node App: Not running")
+            print("Node App: Stopped")
     if python_proc is not None and python_proc.poll() is None:
         python_proc.terminate()
         try:
             python_proc.wait(timeout=5)
         except subprocess.TimeoutExpired:
             python_proc.kill()
-        status_python.set("Python Server: Stopped")
-    else:
-        status_python.set("Python Server: Not running")
-    # Close serial port as well
+        print("Python Server: Stopped")
     close_serial_port()
 
-def on_close():
+def signal_handler(sig, frame):
+    print("\nReceived exit signal. Cleaning up...")
     close_servers()
-    root.destroy()
+    sys.exit(0)
 
-# Buttons
-btn_start = tk.Button(root, text="Start Servers", command=start_servers, width=20)
-btn_start.pack(pady=10)
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
-btn_open = tk.Button(root, text="Open Web App", command=open_web, width=20)
-btn_open.pack(pady=10)
+# --- Main logic ---
+def main():
+    print("Starting servers...")
+    start_servers()
+    time.sleep(3)  # Give servers time to start
+    chrome_path = find_chrome_path()
+    browser_proc = None
+    if chrome_path:
+        print("Opening Chrome in fullscreen mode...")
+        browser_proc = subprocess.Popen([
+            chrome_path,
+            '--start-fullscreen',
+            '--new-window',
+            WEB_URL
+        ])
+        try:
+            browser_proc.wait()
+        except KeyboardInterrupt:
+            pass
+        print("Chrome closed. Shutting down servers...")
+    else:
+        print("Chrome not found. Opening in default browser (no fullscreen, press Enter to exit)...")
+        webbrowser.open(WEB_URL)
+        try:
+            input("Press Enter after closing the browser to stop servers...")
+        except KeyboardInterrupt:
+            pass
+    close_servers()
+    print("Cleanup complete. Exiting.")
 
-btn_close = tk.Button(root, text="Close Servers", command=close_servers, width=20)
-btn_close.pack(pady=10)
-
-# Status labels
-label_node = tk.Label(root, textvariable=status_node, fg="green")
-label_node.pack(pady=2)
-label_python = tk.Label(root, textvariable=status_python, fg="blue")
-label_python.pack(pady=2)
-
-root.protocol("WM_DELETE_WINDOW", on_close)
-root.mainloop()
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as e:
+        print(f"Error: {e}")
+        close_servers()
+        sys.exit(1)

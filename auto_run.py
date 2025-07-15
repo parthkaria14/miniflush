@@ -3,15 +3,18 @@ import subprocess
 import webbrowser
 import os
 import time
+import socket
+import serial
 
 # Path to your venv's python.exe
-VENV_PYTHON = r"D:\Projects\venv\Scripts\python.exe"
+# VENV_PYTHON = r"D:\Projects\venv\Scripts\python.exe"
+
 
 node_proc = None
 python_proc = None
 
 # URL to open
-WEB_URL = "http://192.168.31.60:3000"
+WEB_URL = "http://192.168.2.190:3000"
 
 # Tkinter setup
 root = tk.Tk()
@@ -23,6 +26,8 @@ status_python = tk.StringVar()
 status_node.set("Node App: Not running")
 status_python.set("Python Server: Not running")
 
+SERIAL_PORT = "COM1"  # Match with server.py
+BAUD_RATE = 9600
 
 def start_servers():
     global node_proc, python_proc
@@ -37,7 +42,8 @@ def start_servers():
         status_node.set("Node App: Already running")
     if python_proc is None or python_proc.poll() is not None:
         python_proc = subprocess.Popen(
-            f'"{VENV_PYTHON}" server.py',
+            # f'"{VENV_PYTHON}" server.py',
+            "python server.py",
             cwd=os.getcwd(),
             shell=True
         )
@@ -49,6 +55,20 @@ def start_servers():
 def open_web():
     webbrowser.open(WEB_URL)
 
+def is_port_open(port):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex(('0.0.0.0', port)) == 0 or s.connect_ex(('127.0.0.1', port)) == 0
+
+def close_serial_port():
+    """Close the serial port if it's in use."""
+    try:
+        ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
+        if ser.is_open:
+            ser.close()
+            print(f"Closed {SERIAL_PORT} successfully.")
+    except serial.SerialException as e:
+        print(f"Could not close {SERIAL_PORT}: {e}")
+
 def close_servers():
     global node_proc, python_proc
     if node_proc is not None and node_proc.poll() is None:
@@ -57,7 +77,11 @@ def close_servers():
             node_proc.wait(timeout=5)
         except subprocess.TimeoutExpired:
             node_proc.kill()
-        status_node.set("Node App: Stopped")
+        time.sleep(1)  # Give OS a moment to release the port
+        if is_port_open(3000):
+            status_node.set("Node App: Port still in use!")
+        else:
+            status_node.set("Node App: Stopped")
     else:
         status_node.set("Node App: Not running")
     if python_proc is not None and python_proc.poll() is None:
@@ -69,6 +93,8 @@ def close_servers():
         status_python.set("Python Server: Stopped")
     else:
         status_python.set("Python Server: Not running")
+    # Close serial port as well
+    close_serial_port()
 
 def on_close():
     close_servers()
@@ -91,4 +117,4 @@ label_python = tk.Label(root, textvariable=status_python, fg="blue")
 label_python.pack(pady=2)
 
 root.protocol("WM_DELETE_WINDOW", on_close)
-root.mainloop() 
+root.mainloop()

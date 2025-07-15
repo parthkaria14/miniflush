@@ -384,14 +384,6 @@
    'C:\\Users\\Parth '
    'karia\\AppData\\Local\\Programs\\Python\\Python310\\lib\\threading.py',
    'PYMODULE'),
-  ('tkinter',
-   'C:\\Users\\Parth '
-   'karia\\AppData\\Local\\Programs\\Python\\Python310\\lib\\tkinter\\__init__.py',
-   'PYMODULE'),
-  ('tkinter.constants',
-   'C:\\Users\\Parth '
-   'karia\\AppData\\Local\\Programs\\Python\\Python310\\lib\\tkinter\\constants.py',
-   'PYMODULE'),
   ('token',
    'C:\\Users\\Parth '
    'karia\\AppData\\Local\\Programs\\Python\\Python310\\lib\\token.py',
