@@ -164,18 +164,18 @@ const StatsPage = () => {
               className="absolute inset-0 w-full h-full object-cover rotate-180 z-0"
             />
             <div className="relative top-4 flex flex-col items-center justify-center z-10">
-              <div className="text-6xl text-yellow-500">Games</div>
-              <div className="text-5xl text-yellow-500">{gameState.games_played ?? 0}</div>
+              <div className="text-3xl text-yellow-500">Games</div>
+              <div className="text-2xl text-yellow-500">{gameState.games_played ?? 0}</div>
               {/* {console.log(gameState)} */}
             </div>
             <div className="relative top-4 flex flex-col items-center justify-center z-10">
-              <div className="text-6xl text-yellow-500">Bets</div>
-              <div className="text-5xl text-yellow-500">Max : {gameState.max_bet}</div>
-              <div className="text-5xl text-yellow-500">Min : {gameState.min_bet}</div>
+              <div className="text-3xl text-yellow-500">Bets</div>
+              <div className="text-2xl text-yellow-500">Max : {gameState.max_bet}</div>
+              <div className="text-2xl text-yellow-500">Min : {gameState.min_bet}</div>
             </div>
             <div className="relative top-4 flex flex-col items-center justify-center z-10">
-              <div className="text-6xl text-yellow-500">Table</div>
-              <div className="text-5xl text-yellow-500">{gameState.table_number}</div>
+              <div className="text-3xl text-yellow-500">Table</div>
+              <div className="text-2xl text-yellow-500">{gameState.table_number}</div>
             </div>
           </footer>
         </div>
