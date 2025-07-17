@@ -46,7 +46,7 @@ game_state = {
     "winners": [],
     "min_bet": 10,
     "max_bet": 1000,
-    "table_number": 1,
+    "table_number": "1FT",
     "current_dealing_player": None,
     "cards_dealt": 0
 }

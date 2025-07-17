@@ -148,7 +148,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
     
     sendMessage({
       action: 'change_game_settings',
-      table_number: tableNumber
+      table_number: tableNumber+'FT'
     });
     addNotification('Updating table number...', 'info');
     setIsTableModalOpen(false);
@@ -459,7 +459,7 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
               <div className="flex flex-col gap-2">
                 <label className="text-3xl font-semibold">Table Number</label>
                 <input
-                  type="number"
+                  type="text"
                   value={tempTableNumber}
                   onChange={(e) => setTempTableNumber(e.target.value)}
                   className="px-4 py-2 border rounded-lg text-3xl"

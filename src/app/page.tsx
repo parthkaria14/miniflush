@@ -54,17 +54,31 @@ const StatsPage = () => {
   return (
     <div className="min-h-screen bg-[#D6AB5D] flex flex-col items-center justify-center">
       <div className="h-[94vh] w-[96vw] m-3 bg-[#971909] flex flex-col">
-        <nav className="w-full h-[15vh] relative flex items-center justify-center">
-          <img
-            src="/assets/wood.png"
-            alt="Wood Background"
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-          <img
-            src="/assets/royal_flush.png"
-            alt="Royal Flush"
-            className="relative z-10 h-[22.5vh] object-contain"
-          />
+        <nav className="w-full h-[15vh] relative flex items-center justify-between px-8">
+          {/* Left: Table Number */}
+          <div className="relative z-20 flex flex-col items-center justify-center">
+            <div className="text-3xl text-yellow-500">Table</div>
+            <div className="text-2xl text-yellow-500">{gameState.table_number}</div>
+          </div>
+          {/* Center: Wood background and Royal Flush */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full flex items-center justify-center pointer-events-none">
+            <img
+              src="/assets/wood.png"
+              alt="Wood Background"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <img
+              src="/assets/royal_flush.png"
+              alt="Royal Flush"
+              className="relative z-10 h-[22.5vh] object-contain mx-auto"
+            />
+          </div>
+          {/* Right: Bets */}
+          <div className="relative z-20 flex flex-col items-center justify-center">
+            <div className="text-3xl text-yellow-500">Bets</div>
+            <div className="text-2xl text-yellow-500">Max : {gameState.max_bet}</div>
+            <div className="text-2xl text-yellow-500">Min : {gameState.min_bet}</div>
+          </div>
         </nav>
         <div className='poko flex-1 grid grid-cols-9 grid-rows-9 w-[96vw] h-[79vh]'>
           <div className="col-start-1 col-end-2 row-start-2 row-end-8 flex items-center justify-center z-10">
@@ -157,25 +171,15 @@ const StatsPage = () => {
             </div> */}
             <img src="/assets/ocean7.png" alt="Side Design" className="w-full h-full object-contain" />
           </div>
-          <footer className="col-start-1 col-end-10 row-start-8 row-end-10 flex justify-around items-center relative">
+          <footer className="col-start-1 col-end-10 row-start-8 row-end-10 flex justify-start items-center relative">
             <img
               src="/assets/wood.png"
               alt="Wood Background"
               className="absolute inset-0 w-full h-full object-cover rotate-180 z-0"
             />
-            <div className="relative top-4 flex flex-col items-center justify-center z-10">
+            <div className="relative top-4 flex flex-col items-center justify-center z-10 ml-12">
               <div className="text-3xl text-yellow-500">Games</div>
               <div className="text-2xl text-yellow-500">{gameState.games_played ?? 0}</div>
-              {/* {console.log(gameState)} */}
-            </div>
-            <div className="relative top-4 flex flex-col items-center justify-center z-10">
-              <div className="text-3xl text-yellow-500">Bets</div>
-              <div className="text-2xl text-yellow-500">Max : {gameState.max_bet}</div>
-              <div className="text-2xl text-yellow-500">Min : {gameState.min_bet}</div>
-            </div>
-            <div className="relative top-4 flex flex-col items-center justify-center z-10">
-              <div className="text-3xl text-yellow-500">Table</div>
-              <div className="text-2xl text-yellow-500">{gameState.table_number}</div>
             </div>
           </footer>
         </div>
