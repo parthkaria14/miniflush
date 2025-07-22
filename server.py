@@ -339,8 +339,8 @@ async def handle_connection(websocket):
                     # Save state before making changes
                     save_state()
                     # Clear all results first
-                    for pid in game_state["players"]:
-                        game_state["players"][pid]["result"] = None
+                    # for pid in game_state["players"]:
+                    #     game_state["players"][pid]["result"] = None
                     game_state["players"][player_id]["result"] = result
                     game_state["game_phase"] = "revealed"
                     await broadcast({

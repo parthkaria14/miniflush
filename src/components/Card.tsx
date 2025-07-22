@@ -4,9 +4,10 @@ import React, { useState, useEffect } from 'react';
 interface CardProps {
   card: string;
   hidden?: boolean;
+  isDealer:boolean;
 }
 
-const Card: React.FC<CardProps> = ({ card, hidden = false }) => {
+const Card: React.FC<CardProps> = ({ card, hidden = false, isDealer}) => {
   const [currPage, setCurrPage] = useState<'dealer' | 'player' | 'stats'>('stats');
   let cardSize = '';
   if (currPage === 'player') {
@@ -30,14 +31,14 @@ const Card: React.FC<CardProps> = ({ card, hidden = false }) => {
   }, []);
 
   const handleTouchStart = () => {
-    if (currPage === 'player') {
+    if (currPage === 'player' && !isDealer) {
       console.log("touched");
       setIsTouched(prev => !prev);
     }
   };
 
   const handleTouchEnd = () => {
-    if (currPage === 'player') {
+    if (currPage === 'player' && !isDealer) {
       console.log("untouched");
       setIsTouched(prev => !prev);
     }

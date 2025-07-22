@@ -35,6 +35,16 @@ export default function PlayerView() {
   const [showWinnerModal, setShowWinnerModal] = useState(false);
   const [winner, setWinner] = useState<number | null>(null);
   const [showAnteModal, setShowAnteModal] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+
+  useEffect(() => {
+    if (!currentPlayerId) {
+      setIsActive(false);
+      return;
+    }
+    const player = gameState.players?.[currentPlayerId];
+    setIsActive(!!player?.active);
+  }, [gameState.players, currentPlayerId]);
 
   // Get current player ID from URL
   useEffect(() => {
@@ -175,6 +185,18 @@ export default function PlayerView() {
     registerActionHandler('show_ante_popup', handler);
     return () => unregisterActionHandler('show_ante_popup', handler);
   }, [registerActionHandler, unregisterActionHandler]);
+
+  // Show video if player is not active
+  if (!isActive) {
+    return (
+      <div className="flex justify-center items-center h-screen w-screen bg-black">
+        <video autoPlay loop muted className="w-full h-full object-cover">
+          <source src="/assets/ocean7vid.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-[#450A03]">

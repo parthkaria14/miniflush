@@ -118,6 +118,7 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
             key={`${card}-${index}`}
             card={card}
             hidden={!showCards}
+            isDealer={isDealer}
           />
         ))}
         {/* Show card backs for empty slots using Card component */}
@@ -126,6 +127,7 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
             key={`empty-${index}`}
             card="back"
             hidden={true}
+            isDealer={isDealer}
           />
         ))}
         {/* Show add button only for active players in manual mode */}

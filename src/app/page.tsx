@@ -23,11 +23,12 @@ type Player = {
   has_acted?: boolean;
 };
 
-function getPlayerState(player: Player): 'inactive' | 'won' | 'lost' | 'ante' | 'dealt' | 'played' {
+function getPlayerState(player: Player): 'inactive' | 'won' | 'lost' | 'ante' | 'dealt' | 'played'| 'fold' {
   if (!player.active) return 'inactive';
   if (player.result === 'win') return 'won';
   if (player.result === 'lose') return 'lost';
   if (player.action_type === 'ante') return 'ante';
+  if (player.action_type === 'surrender') return 'fold';
   if (player.hand && player.hand.length === 3 && !player.has_acted) return 'dealt';
   if (player.hand && player.hand.length === 3 && player.has_acted) return 'played';
   return 'inactive'; // fallback, but should not be reached
@@ -37,15 +38,17 @@ const stateToImg: Record<string, string> = {
   inactive: '/assets/black.png',
   won: '/assets/green.png',
   lost: '/assets/red.png',
+  fold: '/assets/red.png',
   ante: '/assets/purple.png',
   dealt: '/assets/brown.png',
   played: '/assets/brown.png',
 };
 
-const stateToOverlay: Partial<Record<'won' | 'lost' | 'ante', string>> = {
+const stateToOverlay: Partial<Record<'won' | 'lost' | 'ante' | 'fold', string>> = {
   won: 'WON',
   lost: 'LOST',
   ante: 'ANTE',
+  fold: 'FOLD',
 };
 
 const StatsPage = () => {
@@ -124,7 +127,7 @@ const StatsPage = () => {
                   </div>
                   <div className="relative w-[8vw] h-[14vh] flex items-center justify-center ml-2">
                     <img src={imgSrc} alt="Player State" className="w-full h-full object-contain" />
-                    <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-white px-4 py-2 text-2xl flex flex-col items-center">
+                    <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-white px-4 py-2 text-xl flex flex-col items-center">
                       <div className='font-bold text-3xl'>{idx + 1}</div>
                       <div>{overlay}</div>
                     </div>
