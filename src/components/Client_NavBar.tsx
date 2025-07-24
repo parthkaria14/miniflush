@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useWebSocket } from '@/contexts/WebSocketContext';
+import { useWebSocket, safeTableNumber } from '@/contexts/WebSocketContext';
 import { useEffect, useState } from 'react';
 
 interface Client_NavbarProps {
@@ -39,7 +39,7 @@ const Client_Navbar: React.FC<Client_NavbarProps> = ({
               className="object-contain"
             />
             <div className="text-white text-xl mt-2">
-              Table: {typeof gameState.table_number === 'string' && gameState.table_number.match(/^(\d+)FT$/) ? `FT-${gameState.table_number.replace('FT', '')}` : `FT-${gameState.table_number}`}
+              Table: {(() => { const t = String(safeTableNumber(gameState.table_number)); return t.match(/^\d+FT$/) ? `FT-${t.replace('FT', '')}` : `FT-${t}`; })()}
             </div>
           </div>
           

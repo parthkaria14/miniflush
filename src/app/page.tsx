@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { useWebSocket } from '@/contexts/WebSocketContext';
+import { useWebSocket, safeTableNumber, safeMinBet, safeMaxBet } from '@/contexts/WebSocketContext';
 import StatsHand from '@/components/StatsHand';
 
 const playerGrid = [
@@ -61,7 +61,7 @@ const StatsPage = () => {
           {/* Left: Table Number */}
           <div className="relative z-20 flex flex-col items-center justify-center">
             <div className="text-3xl text-yellow-500">Table</div>
-            <div className="text-2xl text-yellow-500">{(() => { const t = String(gameState.table_number); return t.match(/^(\d+)FT$/) ? `FT-${t.replace('FT', '')}` : `FT-${t}`; })()}</div>
+            <div className="text-2xl text-yellow-500">{(() => { const t = String(safeTableNumber(gameState.table_number)); return t.match(/^\d+FT$/) ? `FT-${t.replace('FT', '')}` : `FT-${t}`; })()}</div>
           </div>
           {/* Center: Wood background and Royal Flush */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full flex items-center justify-center pointer-events-none">
@@ -79,8 +79,8 @@ const StatsPage = () => {
           {/* Right: Bets */}
           <div className="relative z-20 flex flex-col items-center justify-center">
             <div className="text-3xl text-yellow-500">Bets</div>
-            <div className="text-2xl text-yellow-500">Max : {gameState.max_bet}</div>
-            <div className="text-2xl text-yellow-500">Min : {gameState.min_bet}</div>
+            <div className="text-2xl text-yellow-500">Max : {safeMaxBet(gameState.max_bet)}</div>
+            <div className="text-2xl text-yellow-500">Min : {safeMinBet(gameState.min_bet)}</div>
           </div>
         </nav>
         <div className='poko flex-1 grid grid-cols-9 grid-rows-9 w-[96vw] h-[79vh]'>

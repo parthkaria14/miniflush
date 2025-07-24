@@ -968,6 +968,8 @@ async def delete_win():
         if result.deleted_count > 0:
             print(f"Deleted last win: {last_win}")
             await broadcast({"action": "delete_win"})
+            await broadcast_game_state()  # Broadcast updated games played
+            await handle_reset_table()    # Reset the table
         else:
             print("Failed to delete the last win.")
     else:
@@ -979,6 +981,8 @@ async def delete_all_wins():
     if result.deleted_count > 0:
         print(f"Deleted all wins: {result.deleted_count} records")
         await broadcast({"action": "delete_all_wins"})
+        await broadcast_game_state()  # Broadcast updated games played
+        await handle_reset_table()    # Reset the table
     else:
         print("No win records found to delete.")
 

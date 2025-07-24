@@ -71,6 +71,20 @@ const WebSocketContext = createContext<WebSocketContextType>({
 
 export const useWebSocket = () => useContext(WebSocketContext);
 
+// Helper functions for safe display
+export function safeTableNumber(table_number: any) {
+  if (table_number === undefined || table_number === null || table_number === "") return 1;
+  return table_number;
+}
+export function safeMinBet(min_bet: any) {
+  if (min_bet === undefined || min_bet === null || min_bet === "") return 100;
+  return min_bet;
+}
+export function safeMaxBet(max_bet: any) {
+  if (max_bet === undefined || max_bet === null || max_bet === "") return 1000;
+  return max_bet;
+}
+
 export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [gameState, setGameState] = useState<GameState>(defaultGameState);
@@ -192,7 +206,14 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             case 'player_acted':
             case 'card_added':
               setPreviousGameState(gameState);
-              setGameState(data.game_state);
+              setGameState(prev => ({
+                ...prev,
+                ...data.game_state,
+                min_bet: data.game_state.min_bet !== undefined ? data.game_state.min_bet : prev.min_bet,
+                max_bet: data.game_state.max_bet !== undefined ? data.game_state.max_bet : prev.max_bet,
+                table_number: data.game_state.table_number !== undefined ? data.game_state.table_number : prev.table_number,
+                games_played: data.game_state.games_played !== undefined ? data.game_state.games_played : prev.games_played,
+              }));
               break;
             case 'game_settings_changed':
               console.log('Received game_settings_changed:', data);
@@ -220,8 +241,12 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             case 'table_reset':
               setPreviousGameState(gameState);
               setGameState(prev => ({
+                ...prev,
                 ...data.game_state,
-                games_played: data.game_state.games_played !== undefined ? data.game_state.games_played : prev.games_played
+                min_bet: data.game_state.min_bet !== undefined ? data.game_state.min_bet : prev.min_bet,
+                max_bet: data.game_state.max_bet !== undefined ? data.game_state.max_bet : prev.max_bet,
+                table_number: data.game_state.table_number !== undefined ? data.game_state.table_number : prev.table_number,
+                games_played: data.game_state.games_played !== undefined ? data.game_state.games_played : prev.games_played,
               }));
               break;
             case 'undo_completed':
