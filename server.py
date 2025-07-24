@@ -357,6 +357,22 @@ async def handle_connection(websocket):
                     })
             elif data["action"] == "broadcast_ante":
                 await broadcast({ "action": "show_ante_popup" })
+                # Set all active players' result to 'ante' and update game state for stats page
+                for pid, player in game_state["players"].items():
+                    if player["active"]:
+                        player["result"] = "ante"
+                await broadcast({
+                    "action": "update_game",
+                    "game_state": {
+                        "dealer_hand": game_state["dealer_hand"],
+                        "players": game_state["players"],
+                        "game_phase": game_state["game_phase"],
+                        "winners": game_state["winners"],
+                        "min_bet": game_state["min_bet"],
+                        "max_bet": game_state["max_bet"],
+                        "table_number": game_state["table_number"]
+                    }
+                })
 
     except websockets.ConnectionClosed:
         print(f"Client disconnected: {websocket.remote_address}")

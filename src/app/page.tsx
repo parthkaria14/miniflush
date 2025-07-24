@@ -27,7 +27,7 @@ function getPlayerState(player: Player): 'inactive' | 'won' | 'lost' | 'ante' | 
   if (!player.active) return 'inactive';
   if (player.result === 'win') return 'won';
   if (player.result === 'lose') return 'lost';
-  if (player.action_type === 'ante') return 'ante';
+  if (player.result === 'ante' || player.action_type === 'ante') return 'ante';
   if (player.action_type === 'surrender') return 'fold';
   if (player.hand && player.hand.length === 3 && !player.has_acted) return 'dealt';
   if (player.hand && player.hand.length === 3 && player.has_acted) return 'played';

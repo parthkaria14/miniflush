@@ -34,6 +34,7 @@ interface GameState {
   max_bet: number;
   table_number: number;
   dealer_qualifies?: boolean;
+  games_played?: number;
 }
 
 interface WebSocketContextType {

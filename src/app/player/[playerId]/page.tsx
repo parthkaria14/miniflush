@@ -164,9 +164,11 @@ export default function PlayerView() {
       if (currentPlayer.result === 'win') {
         setWinner(0); // Player wins
         setShowWinnerModal(true);
+        setShowAnteModal(false); // Hide ante popup when win/lose is shown
       } else if (currentPlayer.result === 'lose') {
         setWinner(1); // Player loses (dealer wins)
         setShowWinnerModal(true);
+        setShowAnteModal(false); // Hide ante popup when win/lose is shown
       }
     }
   }, [gameState.game_phase, currentPlayer]);
@@ -180,6 +182,7 @@ export default function PlayerView() {
     if (!registerActionHandler || !unregisterActionHandler) return;
     const handler = () => {
       setShowAnteModal(true);
+      setShowWinnerModal(false); // Hide win/lose popup when ante is shown
       setTimeout(() => setShowAnteModal(false), 3000);
     };
     registerActionHandler('show_ante_popup', handler);
