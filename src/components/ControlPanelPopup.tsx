@@ -127,7 +127,10 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
   };
 
   const handleOpenTableModal = () => {
-    setTempTableNumber(gameState.table_number?.toString() || '');
+    // Always show as FT-{number} in the textbox
+    let t = String(gameState.table_number);
+    let displayTableNumber = t.match(/^(\d+)FT$/) ? `FT-${t.replace('FT', '')}` : (t.match(/^FT-(\d+)$/) ? t : `FT-${t}`);
+    setTempTableNumber(displayTableNumber);
     setIsTableModalOpen(true);
   };
 
@@ -136,19 +139,17 @@ const ControlPanelPopup: React.FC<ControlPanelPopupProps> = ({ open, onClose, on
       addNotification('Table number cannot be empty', 'error');
       return;
     }
-    
-    const tableNumber = parseInt(tempTableNumber);
-    if (isNaN(tableNumber) || tableNumber < 1) {
-      addNotification('Table number must be a positive number', 'error');
+    // Accept FT-1 or 1FT, always store as 1FT
+    let input = tempTableNumber.trim();
+    let match = input.match(/^FT-(\d+)$/);
+    let tableNumber = match ? `${match[1]}FT` : (input.match(/^(\d+)FT$/) ? input : input.replace(/\D/g, '') + 'FT');
+    if (!tableNumber.match(/^(\d+)FT$/)) {
+      addNotification('Table number must be in format FT-1', 'error');
       return;
     }
-    
-    console.log('Saving table number:', tableNumber);
-    console.log('Current game state:', gameState);
-    
     sendMessage({
       action: 'change_game_settings',
-      table_number: tableNumber+'FT'
+      table_number: tableNumber
     });
     addNotification('Updating table number...', 'info');
     setIsTableModalOpen(false);

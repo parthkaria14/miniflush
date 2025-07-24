@@ -61,7 +61,7 @@ const StatsPage = () => {
           {/* Left: Table Number */}
           <div className="relative z-20 flex flex-col items-center justify-center">
             <div className="text-3xl text-yellow-500">Table</div>
-            <div className="text-2xl text-yellow-500">{gameState.table_number}</div>
+            <div className="text-2xl text-yellow-500">{(() => { const t = String(gameState.table_number); return t.match(/^(\d+)FT$/) ? `FT-${t.replace('FT', '')}` : `FT-${t}`; })()}</div>
           </div>
           {/* Center: Wood background and Royal Flush */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full flex items-center justify-center pointer-events-none">

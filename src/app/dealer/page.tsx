@@ -389,7 +389,7 @@ export default function DealerView() {
                 style={{ width: 250, minHeight: 56, padding: '8px 0' }}
                 disabled={!isConnected || isLoading}
               >
-                <span className="text-xl font-bold">Reset Game</span>
+                <span className="text-xl font-bold">New Game</span>
               </button>
             </div>
           </div>

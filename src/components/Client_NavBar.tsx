@@ -39,7 +39,7 @@ const Client_Navbar: React.FC<Client_NavbarProps> = ({
               className="object-contain"
             />
             <div className="text-white text-xl mt-2">
-              Table: {gameState.table_number}
+              Table: {typeof gameState.table_number === 'string' && gameState.table_number.match(/^(\d+)FT$/) ? `FT-${gameState.table_number.replace('FT', '')}` : `FT-${gameState.table_number}`}
             </div>
           </div>
           
