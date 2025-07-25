@@ -26,18 +26,26 @@ const Navbar: React.FC<NavbarProps> = ({
       <div className="relative h-full">
         <div className="flex items-center justify-between h-full -mt-4 px-8">
           {/* Left Logo */}
-          <div className="w-32 h-32 relative flex flex-col items-center justify-center">
-            <Image
-              src="/assets/mini_flush.png"
-              alt="Left Logo"
-              width={120}
-              height={120}  
-              className="object-contain"
-            />
-            <div className="text-white text-xl mt-2">
-              Table: {(() => { const t = String(safeTableNumber(gameState.table_number)); return t.match(/^\d+FT$/) ? `FT-${t.replace('FT', '')}` : `FT-${t}`; })()}
+          <div className="flex flex-row gap-4">
+            <div className="w-32 h-32 relative flex flex-col items-center justify-center">
+              <Image
+                src="/assets/mini_flush.png"
+                alt="Left Logo"
+                width={120}
+                height={120}  
+                className="object-contain"
+              />
+              <div className="text-white text-xl mt-2">
+                Table: {(() => { const t = String(safeTableNumber(gameState.table_number)); return t.match(/^\d+FT$/) ? `FT-${t.replace('FT', '')}` : `FT-${t}`; })()}
+              </div>
+            </div>
+            <div className="flex flex-col justify-center items-center text-yellow-500 text-xl">
+              <div>Bets</div>
+              <div>Max : {gameState.max_bet}</div>
+              <div>Min : {gameState.min_bet}</div>
             </div>
           </div>
+          
           
 
           {/* Center Hats */}

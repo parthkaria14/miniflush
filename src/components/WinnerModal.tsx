@@ -36,7 +36,7 @@ const WinnerModal = ({ show, onClose, winner }: { show: boolean; onClose: () => 
   return (
     <AnimatePresence>
       {show && (
-        <div className="fixed h-screen w-full z-50 inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+        <div className="fixed h-screen w-full z-50 top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
           {showConfetti && <Confetti />}
           
           <motion.div

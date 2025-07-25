@@ -60,8 +60,8 @@ const StatsPage = () => {
         <nav className="w-full h-[15vh] relative flex items-center justify-between px-8">
           {/* Left: Table Number */}
           <div className="relative z-20 flex flex-col items-center justify-center">
-            <div className="text-3xl text-yellow-500">Table</div>
-            <div className="text-2xl text-yellow-500">{(() => { const t = String(safeTableNumber(gameState.table_number)); return t.match(/^\d+FT$/) ? `FT-${t.replace('FT', '')}` : `FT-${t}`; })()}</div>
+            <div className="text-6xl text-yellow-500">Table</div>
+            <div className="text-6xl text-yellow-500">{(() => { const t = String(safeTableNumber(gameState.table_number)); return t.match(/^\d+FT$/) ? `FT-${t.replace('FT', '')}` : `FT-${t}`; })()}</div>
           </div>
           {/* Center: Wood background and Royal Flush */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full flex items-center justify-center pointer-events-none">
@@ -78,9 +78,9 @@ const StatsPage = () => {
           </div>
           {/* Right: Bets */}
           <div className="relative z-20 flex flex-col items-center justify-center">
-            <div className="text-3xl text-yellow-500">Bets</div>
-            <div className="text-2xl text-yellow-500">Max : {safeMaxBet(gameState.max_bet)}</div>
-            <div className="text-2xl text-yellow-500">Min : {safeMinBet(gameState.min_bet)}</div>
+            <div className="text-6xl text-yellow-500">Bets</div>
+            <div className="text-6xl text-yellow-500">Max : {safeMaxBet(gameState.max_bet)}</div>
+            <div className="text-6xl text-yellow-500">Min : {safeMinBet(gameState.min_bet)}</div>
           </div>
         </nav>
         <div className='poko flex-1 grid grid-cols-9 grid-rows-9 w-[96vw] h-[79vh]'>
@@ -128,7 +128,7 @@ const StatsPage = () => {
                   <div className="relative w-[8vw] h-[14vh] flex items-center justify-center ml-2">
                     <img src={imgSrc} alt="Player State" className="w-full h-full object-contain" />
                     <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-white px-4 py-2 text-xl flex flex-col items-center">
-                      <div className='font-bold text-3xl'>{idx + 1}</div>
+                      <div className='font-bold text-5xl'>{idx + 1}</div>
                       <div>{overlay}</div>
                     </div>
                   </div>
@@ -147,7 +147,7 @@ const StatsPage = () => {
                   <div className="relative w-[8vw] h-[14vh] flex items-center justify-center mr-2">
                     <img src={imgSrc} alt="Player State" className="w-full h-full object-contain" />
                     <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-white px-4 py-2 text-2xl flex flex-col items-center">
-                      <div className='font-bold text-3xl'>{idx + 4}</div>
+                      <div className='font-bold text-5xl'>{idx + 4}</div>
                       <div>{overlay}</div>
                     </div>
                   </div>
@@ -181,13 +181,13 @@ const StatsPage = () => {
               className="absolute inset-0 w-full h-full object-cover rotate-180 z-0"
             />
             <div className="relative top-4 flex flex-col items-center justify-center z-10 ml-12">
-              <div className="text-3xl text-yellow-500">Games</div>
-              <div className="text-2xl text-yellow-500">{gameState.games_played ?? 0}</div>
+              <div className="text-6xl text-yellow-500">Games</div>
+              <div className="text-6xl text-yellow-500">{gameState.games_played ?? 0}</div>
             </div>
           </footer>
         </div>
       </div>
-      <div className='absolute bottom-0 text-center'>This is the result display screen. All table results and managements decision will be final.</div>
+      <div className='absolute text-4xl bottom-0 text-center'>This is the result display screen. All table results and managements decision will be final.</div>
     </div>
   );
 };
