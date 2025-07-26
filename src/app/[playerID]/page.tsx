@@ -50,7 +50,7 @@ export default function PlayerView() {
   useEffect(() => {
     const pathParts = window.location.pathname.split('/');
     const idFromUrl = pathParts[pathParts.length - 1];
-    const playerId = `player${idFromUrl}`;
+    const playerId = `${idFromUrl}`;
     setCurrentPlayerId(playerId);
     console.log(`PlayerView: Current Player ID from URL: ${playerId}`); // Debug log
   }, []);
@@ -206,7 +206,7 @@ export default function PlayerView() {
       <Client_Navbar/>
       <div className="flex-1 m-3 poko p-2 bg-[#911606] flex justify-center" style={{ border: '10px solid #D6AB5D' }}>
         <div className="mx-auto">
-          <div className="m-4 text-center">
+          <div className="m-2 text-center">
             <span className="inline-block px-4 py-2 text-yellow-500 text-5xl rounded-lg">
               {(() => {
                 if (!currentPlayerId) return '';
@@ -217,7 +217,7 @@ export default function PlayerView() {
           </div>
 
           {/* Game Phase */}
-          <div className="m-4 text-center">
+          <div className="m-2 text-center">
             <span className="inline-block px-4 py-2 bg-[#741003] text-white text-sm rounded-lg">
               {gameState?.game_phase ? 
                 gameState.game_phase.charAt(0).toUpperCase() + gameState.game_phase.slice(1) : 
@@ -286,7 +286,7 @@ export default function PlayerView() {
                   {/* <div>&nbsp;</div> */}
                   <button
                     onClick={() => setShowPlayerCards(!showPlayerCards)}
-                    className={`px-4 py-2 mb-2 rounded transition-colors duration-200 bg-[#741003]
+                    className={`px-4 py-2 rounded transition-colors duration-200 bg-[#741003]
                       text-white ${(!isConnected || !isCurrentPlayerActive) ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={!isConnected || !isCurrentPlayerActive}
                   >
