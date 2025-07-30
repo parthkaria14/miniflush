@@ -467,6 +467,85 @@ async def handle_deal_cards():
     })
     await broadcast_game_state()
 
+async def handle_deal_cards_with_delay():
+    """Deals cards one by one with delays to create a simulation effect."""
+    global game_state
+    
+    # Get list of active players in order, dealer is last
+    active_players = [pid for pid, player in game_state["players"].items() if player["active"]]
+    deal_order = active_players + ["dealer"]  # Dealer is always last
+
+    save_state()
+    
+    # Reset hands and player states
+    game_state["dealer_hand"] = []
+    for player in game_state["players"].values():
+        player["hand"] = []
+        player["result"] = None
+        player["has_acted"] = False
+        player["action_type"] = None
+        # Clear previous round data
+        for key in ["main_bet_result", "high_bet_result", "low_bet_result", "high_combination", "low_combination"]:
+            if key in player:
+                del player[key]
+    # Clear dealer data
+    for key in ["dealer_combination", "dealer_qualifies"]:
+        if key in game_state:
+            del game_state[key]
+
+    game_state["game_phase"] = "dealing"
+    game_state["winners"] = []
+    
+    # Deal cards round-robin: 3 rounds with delays
+    for round_num in range(3):
+        for target in deal_order:
+            if target == "dealer":
+                if len(game_state["dealer_hand"]) < 3 and game_state["deck"]:
+                    game_state["dealer_hand"].append(game_state["deck"].pop(0))
+                    # Broadcast the updated state after each card
+                    await broadcast({
+                        "action": "card_dealt",
+                        "target": target,
+                        "game_state": {
+                            "dealer_hand": game_state["dealer_hand"],
+                            "players": game_state["players"],
+                            "game_phase": game_state["game_phase"],
+                            "deck_size": len(game_state["deck"])
+                        }
+                    })
+                    await broadcast_game_state()
+                    # Add delay between each card
+                    await asyncio.sleep(0.5)
+            else:
+                if len(game_state["players"][target]["hand"]) < 3 and game_state["deck"]:
+                    game_state["players"][target]["hand"].append(game_state["deck"].pop(0))
+                    # Broadcast the updated state after each card
+                    await broadcast({
+                        "action": "card_dealt",
+                        "target": target,
+                        "game_state": {
+                            "dealer_hand": game_state["dealer_hand"],
+                            "players": game_state["players"],
+                            "game_phase": game_state["game_phase"],
+                            "deck_size": len(game_state["deck"])
+                        }
+                    })
+                    await broadcast_game_state()
+                    # Add delay between each card
+                    await asyncio.sleep(0.5)
+    
+    # Final broadcast when all cards are dealt
+    await broadcast({
+        "action": "cards_dealt",
+        "game_state": {
+            "dealer_hand": game_state["dealer_hand"],
+            "players": game_state["players"],
+            "game_phase": game_state["game_phase"],
+            "deck_size": len(game_state["deck"])
+        }
+    })
+    await broadcast_game_state()
+
 async def handle_add_player(player_id=None):
     """Activates a player in the game."""
     global game_state
@@ -808,8 +887,8 @@ async def start_automatic():
     await handle_shuffle_deck()
     await asyncio.sleep(1)
     
-    # Step 2: Deal all cards
-    await handle_deal_cards()
+    # Step 2: Deal all cards one by one with delays
+    await handle_deal_cards_with_delay()
     await asyncio.sleep(2)
     
     # Step 3: Reveal hands (commented out for manual control)
