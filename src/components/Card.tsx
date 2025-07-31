@@ -51,7 +51,7 @@ const Card: React.FC<CardProps> = ({ card, hidden = false, isDealer}) => {
         <img 
           src="/cards/card_back.png" 
           alt="Card Back"
-          className="w-full h-full object-fill"
+          className="w-full h-full object-fill border-2 border-[darkRed] rounded-lg"
         />
       </div>
     );
