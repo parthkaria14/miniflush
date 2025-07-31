@@ -187,7 +187,7 @@ const StatsPage = () => {
           </footer>
         </div>
       </div>
-      <div className='absolute text-4xl bottom-0 text-center'>This is the result display screen. All table results and managements decision will be final.</div>
+      <div className='absolute text-4xl bottom-0 text-center'>THIS IS AN ELECTRONIC GAME INCASE OF ANY GRIEVANCES THE MANAGEMENT DECISION WILL BE FINAL.</div>
     </div>
   );
 };
