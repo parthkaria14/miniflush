@@ -15,7 +15,7 @@ const Card: React.FC<CardProps> = ({ card, hidden = false, isDealer}) => {
   } else if (currPage === 'dealer') {
     cardSize = 'w-20 h-28';
   } else if (currPage === 'stats') {
-    cardSize = 'w-32 h-48'; // Further increased size for stats page
+    cardSize = 'w-40 h-56'; // Further increased size for stats page
   }
   const [isTouched, setIsTouched] = useState(false);
 

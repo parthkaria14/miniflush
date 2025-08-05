@@ -8,6 +8,7 @@ import Client_Navbar from '@/components/Client_NavBar';
 import WinnerModal from '@/components/WinnerModal';
 import Footer from '@/components/Footer';
 import AnteModal from '@/components/AnteModal';
+import FoldModal from '@/components/FoldModal';
 
 interface Player {
   hand: string[];
@@ -36,6 +37,7 @@ export default function PlayerView() {
   const [winner, setWinner] = useState<number | null>(null);
   const [showAnteModal, setShowAnteModal] = useState(false);
   const [isActive, setIsActive] = useState(false);
+  const [showFoldModal, setShowFoldModal] = useState(false);
 
   useEffect(() => {
     if (!currentPlayerId) {
@@ -45,6 +47,12 @@ export default function PlayerView() {
     const player = gameState.players?.[currentPlayerId];
     setIsActive(!!player?.active);
   }, [gameState.players, currentPlayerId]);
+
+  useEffect(() => {
+    if (hasSurrendered) {
+      
+    }
+  }, [hasSurrendered]);
 
   // Get current player ID from URL
   useEffect(() => {
@@ -133,6 +141,7 @@ export default function PlayerView() {
       player: currentPlayerId
     });
     setHasSurrendered(true);
+    setShowFoldModal(true);
   };
 
   // Get current player's state
@@ -203,15 +212,20 @@ export default function PlayerView() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#450A03]">
-      <Client_Navbar/>
-      <div className="flex-1 m-3 poko p-2 bg-[#911606] flex justify-center" style={{ border: '10px solid #D6AB5D' }}>
+      <Client_Navbar />
+      <div
+        className="flex-1 m-3 poko p-2 bg-[#911606] flex justify-center"
+        style={{ border: "10px solid #D6AB5D" }}
+      >
         <div className="mx-auto">
           <div className="m-2 text-center">
             <span className="inline-block px-4 py-2 text-yellow-500 text-5xl rounded-lg">
               {(() => {
-                if (!currentPlayerId) return '';
+                if (!currentPlayerId) return "";
                 const match = currentPlayerId.match(/^player(\d)$/i);
-                return match ? `PLAYER ${match[1]}` : currentPlayerId.toUpperCase();
+                return match
+                  ? `PLAYER ${match[1]}`
+                  : currentPlayerId.toUpperCase();
               })()}
             </span>
           </div>
@@ -219,9 +233,10 @@ export default function PlayerView() {
           {/* Game Phase */}
           <div className="m-2 text-center">
             <span className="inline-block px-4 py-2 bg-[#741003] text-white text-sm rounded-lg">
-              {gameState?.game_phase ? 
-                gameState.game_phase.charAt(0).toUpperCase() + gameState.game_phase.slice(1) : 
-                'Waiting for game state...'}
+              {gameState?.game_phase
+                ? gameState.game_phase.charAt(0).toUpperCase() +
+                  gameState.game_phase.slice(1)
+                : "Waiting for game state..."}
             </span>
           </div>
 
@@ -235,7 +250,9 @@ export default function PlayerView() {
               result={null}
               isDealer={true}
               showCards={showDealerCards}
-              highCombination={showDealerCards ? gameState.dealer_combination : undefined}
+              highCombination={
+                showDealerCards ? gameState.dealer_combination : undefined
+              }
               dealerQualifies={gameState.dealer_qualifies}
             />
           </div>
@@ -257,11 +274,13 @@ export default function PlayerView() {
                 </div>
               </div> */}
               <PlayerHand
-                playerId={currentPlayerId || ''}
+                playerId={currentPlayerId || ""}
                 hand={currentPlayer.hand}
                 active={isCurrentPlayerActive}
                 result={currentPlayer.result}
-                showCards={showPlayerCards || gameState.game_phase === 'revealed'}
+                showCards={
+                  showPlayerCards || gameState.game_phase === "revealed"
+                }
                 highCombination={currentPlayer.high_combination}
                 lowCombination={currentPlayer.low_combination}
                 mainBetResult={currentPlayer.main_bet_result}
@@ -270,7 +289,8 @@ export default function PlayerView() {
               />
               {!isCurrentPlayerActive && (
                 <div className="text-center text-red-600 mt-2">
-                  You are not active in this game. (Player ID: {currentPlayerId})
+                  You are not active in this game. (Player ID: {currentPlayerId}
+                  )
                 </div>
               )}
             </div>
@@ -281,19 +301,22 @@ export default function PlayerView() {
             </div>
           )}
 
-              <div className="flex justify-center items-center mb-2">
-                <div className="flex flex-row items-center gap-2">
-                  {/* <div>&nbsp;</div> */}
-                  <button
-                    onClick={() => setShowPlayerCards(!showPlayerCards)}
-                    className={`px-4 py-2 rounded transition-colors duration-200 bg-[#741003]
-                      text-white ${(!isConnected || !isCurrentPlayerActive) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    disabled={!isConnected || !isCurrentPlayerActive}
-                  >
-                    {showPlayerCards ? 'Hide Cards' : 'Show Cards'}
-                  </button>
-                </div>
-              </div>
+          {/* <div className="flex justify-center items-center mb-2">
+            <div className="flex flex-row items-center gap-2">
+              <button
+                onClick={() => setShowPlayerCards(!showPlayerCards)}
+                className={`px-4 py-2 rounded transition-colors duration-200 bg-[#741003]
+                      text-white ${
+                        !isConnected || !isCurrentPlayerActive
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                disabled={!isConnected || !isCurrentPlayerActive}
+              >
+                {showPlayerCards ? "Hide Cards" : "Show Cards"}
+              </button>
+            </div>
+          </div> */}
 
           {/* Player Actions */}
           {currentPlayer && (
@@ -301,16 +324,48 @@ export default function PlayerView() {
               <button
                 onClick={handlePlay}
                 className={`px-6 py-2 bg-green-500 text-white rounded-lg transition-colors
-                  ${isCurrentPlayerActive && !hasCurrentPlayerActed && currentPlayer.hand.length > 0 ? 'hover:bg-green-600' : 'opacity-50 cursor-not-allowed'}`}
-                disabled={!isCurrentPlayerActive || hasCurrentPlayerActed || currentPlayer.hand.length === 0}
+                  ${
+                    isCurrentPlayerActive &&
+                    !hasCurrentPlayerActed &&
+                    currentPlayer.hand.length > 0
+                      ? "hover:bg-green-600"
+                      : "opacity-50 cursor-not-allowed"
+                  }`}
+                disabled={
+                  !isCurrentPlayerActive ||
+                  hasCurrentPlayerActed ||
+                  currentPlayer.hand.length === 0
+                }
               >
                 Play
               </button>
               <button
+                onClick={() => setShowPlayerCards(!showPlayerCards)}
+                className={`px-4 py-2 rounded transition-colors duration-200 bg-[#741003]
+                      text-white ${
+                        !isConnected || !isCurrentPlayerActive
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                disabled={!isConnected || !isCurrentPlayerActive}
+              >
+                {showPlayerCards ? "Hide Cards" : "Show Cards"}
+              </button>
+              <button
                 onClick={handleSurrender}
                 className={`px-6 py-2 bg-red-500 text-white rounded-lg transition-colors
-                  ${isCurrentPlayerActive && !hasCurrentPlayerActed && currentPlayer.hand.length > 0 ? 'hover:bg-red-600' : 'opacity-50 cursor-not-allowed'}`}
-                disabled={!isCurrentPlayerActive || hasCurrentPlayerActed || currentPlayer.hand.length === 0}
+                  ${
+                    isCurrentPlayerActive &&
+                    !hasCurrentPlayerActed &&
+                    currentPlayer.hand.length > 0
+                      ? "hover:bg-red-600"
+                      : "opacity-50 cursor-not-allowed"
+                  }`}
+                disabled={
+                  !isCurrentPlayerActive ||
+                  hasCurrentPlayerActed ||
+                  currentPlayer.hand.length === 0
+                }
               >
                 Fold
               </button>
@@ -320,27 +375,36 @@ export default function PlayerView() {
           {/* Waiting Message */}
           {waitingPlayers.length > 0 && (
             <div className="text-center text-black mb-2">
-              Waiting for {waitingPlayers.length} player{waitingPlayers.length > 1 ? 's' : ''} to act...
+              Waiting for {waitingPlayers.length} player
+              {waitingPlayers.length > 1 ? "s" : ""} to act...
             </div>
           )}
 
           {/* Game Results */}
-          {gameState.game_phase === 'complete' && currentPlayer && (
+          {gameState.game_phase === "complete" && currentPlayer && (
             <div className="mt-8 p-4 bg-white rounded-lg shadow">
               <h3 className="text-lg font-semibold mb-2">Game Results</h3>
               {currentPlayer.main_payout !== undefined && (
                 <div className="mb-2">
-                  Main Bet: {currentPlayer.main_payout > 0 ? 'Won' : 'Lost'} ${Math.abs(currentPlayer.main_payout)}
+                  Main Bet: {currentPlayer.main_payout > 0 ? "Won" : "Lost"} $
+                  {Math.abs(currentPlayer.main_payout)}
                 </div>
               )}
-              {(currentPlayer.high_payout !== undefined || currentPlayer.low_payout !== undefined) && (
+              {(currentPlayer.high_payout !== undefined ||
+                currentPlayer.low_payout !== undefined) && (
                 <div>
                   Side Bets:
                   {currentPlayer.high_payout !== undefined && (
-                    <div>High: {currentPlayer.high_payout > 0 ? 'Won' : 'Lost'} ${Math.abs(currentPlayer.high_payout)}</div>
+                    <div>
+                      High: {currentPlayer.high_payout > 0 ? "Won" : "Lost"} $
+                      {Math.abs(currentPlayer.high_payout)}
+                    </div>
                   )}
                   {currentPlayer.low_payout !== undefined && (
-                    <div>Low: {currentPlayer.low_payout > 0 ? 'Won' : 'Lost'} ${Math.abs(currentPlayer.low_payout)}</div>
+                    <div>
+                      Low: {currentPlayer.low_payout > 0 ? "Won" : "Lost"} $
+                      {Math.abs(currentPlayer.low_payout)}
+                    </div>
                   )}
                 </div>
               )}
@@ -348,13 +412,21 @@ export default function PlayerView() {
           )}
 
           {/* Winner Modal */}
-          <WinnerModal 
-            show={showWinnerModal} 
-            onClose={() => setShowWinnerModal(false)} 
-            winner={winner} 
+          <WinnerModal
+            show={showWinnerModal}
+            onClose={() => setShowWinnerModal(false)}
+            winner={winner}
           />
           {/* Ante Modal */}
-          <AnteModal show={showAnteModal} onClose={() => setShowAnteModal(false)} />
+          <AnteModal
+            show={showAnteModal}
+            onClose={() => setShowAnteModal(false)}
+          />
+          <FoldModal
+            show={showFoldModal}
+            onClose={() => setShowFoldModal(false)}
+            winner={3}
+          ></FoldModal>
         </div>
       </div>
       <Footer />

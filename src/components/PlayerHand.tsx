@@ -91,16 +91,17 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
       {/* For Players - Show Main Bet and Side Bets in a single line */}
       {!isDealer && showCards && (
         <p className="text-sm text-gray-200 ml-2 mb-1">
-          {highCombination && (
+          {/* {highCombination && (
             <>
               Main Bet: {formatCombination(highCombination)}
               {highCombination !== 'high_card' && ` | Side Bet (High): ${formatCombination(highCombination)}`}
             </>
-          )}
+          )} */}
           {lowCombination && lowCombination !== 'no_qualify' && (
             <>
-              {(highCombination) ? ' | ' : ''}
-              Side Bet (Low): {formatCombination(lowCombination)}
+              {/* {(highCombination) ? ' | ' : ''} */}
+              {/* Side Bet (Low): {formatCombination(lowCombination)} */}
+              Bet : {formatCombination(lowCombination)}
             </>
           )}
         </p>
