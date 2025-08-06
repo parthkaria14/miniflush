@@ -57,7 +57,12 @@ MAX_HISTORY = 10  # Keep last 10 states
 
 # Hand rankings for HIGH side bet (higher rank = better hand)
 HIGH_HAND_RANKINGS = {
-    "high_card": 0,           # High Card (no combination)
+    "high_card": 0,           # High Card (no combination) - for cards below 10
+    "ten_top": 0,             # Ten Top
+    "jack_top": 0,            # Jack Top  
+    "queen_top": 0,           # Queen Top
+    "king_top": 0,            # King Top
+    "ace_top": 0,             # Ace Top
     "pair": 1,                # One Pair  
     "flush": 2,               # Flush (all same suit)
     "straight": 3,            # Straight (sequence)
@@ -72,7 +77,12 @@ HIGH_PAYOUTS = {
     "straight": 3,            
     "flush": 2,            
     "pair": 1,             
-    "high_card": 0         
+    "ace_top": 0,          # Ace Top
+    "king_top": 0,         # King Top
+    "queen_top": 0,        # Queen Top
+    "jack_top": 0,         # Jack Top
+    "ten_top": 0,          # Ten Top
+    "high_card": 0         # For cards below 10
 }
 
 # LOW side bet payouts (typical casino payouts)
@@ -82,7 +92,8 @@ LOW_PAYOUTS = {
     "7_top": 3,    
     "8_top": 2,    
     "9_top": 1,    
-    "10_top": 0    
+    "10_top": 0  
+      
 }
 
 def save_state():
@@ -181,8 +192,20 @@ def evaluate_high_hand(hand):
     elif values[1] == values[2]:
         return ("pair", values[1] * 100 + values[0])  # pair value * 100 + kicker
     
-    # High Card
-    return ("high_card", values[0] * 10000 + values[1] * 100 + values[2])
+    # High Card - return specific high card type
+    highest_card = values[0]
+    if highest_card == 14:  # Ace
+        return ("ace_top", values[0] * 10000 + values[1] * 100 + values[2])
+    elif highest_card == 13:  # King
+        return ("king_top", values[0] * 10000 + values[1] * 100 + values[2])
+    elif highest_card == 12:  # Queen
+        return ("queen_top", values[0] * 10000 + values[1] * 100 + values[2])
+    elif highest_card == 11:  # Jack
+        return ("jack_top", values[0] * 10000 + values[1] * 100 + values[2])
+    elif highest_card == 10:  # Ten
+        return ("ten_top", values[0] * 10000 + values[1] * 100 + values[2])
+    else:
+        return ("high_card", values[0] * 10000 + values[1] * 100 + values[2])
 
 def evaluate_low_hand(hand):
     """Evaluates hand for LOW side bet - returns winning condition or None."""
@@ -211,7 +234,7 @@ def evaluate_low_hand(hand):
     
     # Check low conditions (must be NO pair, NO flush, NO straight)
     high_combo, _ = evaluate_high_hand(hand)
-    if high_combo != "high_card":
+    if high_combo not in ["high_card", "ten_top", "jack_top", "queen_top", "king_top", "ace_top"]:
         return None  # Has a combination, so doesn't qualify for low bet
     
     # Check low conditions based on highest card
@@ -237,14 +260,15 @@ def dealer_qualifies(dealer_hand):
     
     dealer_combo, dealer_value = evaluate_high_hand(dealer_hand)
     
-    # Any combination other than high card automatically qualifies
-    if dealer_combo != "high_card":
+    # Any combination other than high card types automatically qualifies
+    if dealer_combo not in ["high_card", "ten_top", "jack_top"]:
         return True
     
-    # For high card, need Queen (12) or better as highest card
-    values = [get_card_value(card) for card in dealer_hand]
-    highest_card = max(values)
-    return highest_card >= 12  # Queen = 12
+    # For high card types, need Queen top or better (Queen, King, Ace)
+    if dealer_combo in ["queen_top", "king_top", "ace_top"]:
+        return True
+    
+    return False  # Ten top, Jack top, or high card (below 10) don't qualify
 
 def compare_hands_main_bet(player_hand, dealer_hand):
     """Compares hands for MAIN/ANTE bet."""
@@ -805,8 +829,10 @@ async def handle_reveal_hands():
         # Set overall result for display (prioritize main bet result)
         if player["main_bet_result"] == "player_wins":
             player["result"] = "win"
-        elif player["main_bet_result"] in ["dealer_no_qualify", "tie"]:
+        elif player["main_bet_result"] == "dealer_no_qualify":
             player["result"] = "ante"
+        elif player["main_bet_result"] == "tie":
+            player["result"] = "tie"
         elif player["main_bet_result"] == "surrender":
             player["result"] = "surrender"  
         else:

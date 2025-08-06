@@ -23,10 +23,11 @@ type Player = {
   has_acted?: boolean;
 };
 
-function getPlayerState(player: Player): 'inactive' | 'won' | 'lost' | 'ante' | 'dealt' | 'played'| 'fold' {
+function getPlayerState(player: Player): 'inactive' | 'won' | 'lost' | 'ante' | 'dealt' | 'played'| 'fold' | 'tie' {
   if (!player.active) return 'inactive';
   if (player.result === 'win') return 'won';
   if (player.result === 'lose') return 'lost';
+  if (player.result === 'tie') return 'tie';
   if (player.result === 'ante' || player.action_type === 'ante') return 'ante';
   if (player.action_type === 'surrender') return 'fold';
   if (player.hand && player.hand.length === 3 && !player.has_acted) return 'dealt';
@@ -40,15 +41,17 @@ const stateToImg: Record<string, string> = {
   lost: '/assets/red.png',
   fold: '/assets/red.png',
   ante: '/assets/purple.png',
+  tie: '/assets/purple.png',
   dealt: '/assets/brown.png',
   played: '/assets/brown.png',
 };
 
-const stateToOverlay: Partial<Record<'won' | 'lost' | 'ante' | 'fold', string>> = {
+const stateToOverlay: Partial<Record<'won' | 'lost' | 'ante' | 'fold' | 'tie', string>> = {
   won: 'WON',
   lost: 'LOST',
   ante: 'ANTE',
   fold: 'FOLD',
+  tie: 'TIE',
 };
 
 const StatsPage = () => {

@@ -41,6 +41,7 @@ const StatsHand: React.FC<StatsHandProps> = ({
     if (!result) return 'text-gray-400';
     if (result === 'win') return 'text-green-500';
     if (result === 'lose') return 'text-red-500';
+    if (result === 'tie') return 'text-yellow-500';
     return 'text-yellow-500';
   };
 
@@ -48,6 +49,7 @@ const StatsHand: React.FC<StatsHandProps> = ({
     if (!result) return '';
     if (result === 'win') return 'Won';
     if (result === 'lose') return 'Lost';
+    if (result === 'tie') return 'Tie';
     if (result === 'surrender') return 'Fold'
     return 'ANTE';
   };
