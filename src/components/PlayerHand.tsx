@@ -1,4 +1,5 @@
 import React from 'react';
+import { useState, useEffect } from 'react';
 import Card from './Card';
 
 interface PlayerHandProps {
@@ -36,6 +37,17 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
   has_acted,
   action_type
 }) => {
+  const [currPage, setCurrPage] = useState("");
+  
+  useEffect(() => {
+      const path = window.location.pathname;
+      if (path.includes('dealer')) {
+        setCurrPage('dealer');
+      } else {
+        setCurrPage('player');
+      }
+  }, []);
+
   const getResultColor = () => {
     console.log(result);
     if (!result) return 'text-gray-400';
@@ -61,7 +73,8 @@ const PlayerHand: React.FC<PlayerHandProps> = ({
   return (
     <div
       className={`rounded-lg bg-[#A42210] min-h-[14vh] border-4 border-[#D6AB5D] border-dashed ${
-        isDealer ? "w-[61.5vw]" : "min-w-[30vw] max-w-[61.5vw]"
+      // isDealer ? "w-[61.5vw]" : "min-w-[30vw] max-w-[61.5vw]"
+        currPage == "player" ? "w-[92.5vw]" : "min-w-[30vw] max-w-[61.5vw]"
       } ${
         isNextToDeal
           ? "ring-4 ring-yellow-500 ring-opacity-100 shadow-[0_0_20px_#D6AB5D]"
