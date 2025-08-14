@@ -151,6 +151,8 @@ def evaluate_high_hand(hand):
     values = sorted([get_card_value(card) for card in hand], reverse=True)
     suits = [get_card_suit(card) for card in hand]
     
+    # print(f"DEBUG: Evaluating hand {hand} -> values: {values}, suits: {suits}")
+    
     # Three of a Kind
     if values[0] == values[1] == values[2]:
         return ("three_of_a_kind", values[0])
@@ -162,18 +164,27 @@ def evaluate_high_hand(hand):
     is_straight = False
     straight_high = 0
     
-    # Regular straights
-    if values[0] - values[1] == 1 and values[1] - values[2] == 1:
+    # Special case: A-K-Q straight (Ace high) - any position/order (check this FIRST)
+    if set(values) == {12, 13, 14}:
         is_straight = True
-        straight_high = values[0]
+        straight_high = 17  # A-K-Q in any order is the highest straight (17 > 15 > 13)
+        # print(f"DEBUG: Detected A-K-Q straight with values {values}, straight_high = {straight_high}")
     
     # Special case: A-2-3 straight (Ace low)
-    elif sorted(values) == [2, 3, 14]:
+    elif set(values) == {2, 3, 14}:
         is_straight = True
-        straight_high = 3  # A-2-3 is 3-high straight
+        straight_high = 15  # A-2-3 is second highest straight (15 > 13 for JQK)
+        # print(f"DEBUG: Detected A-2-3 straight with values {values}, straight_high = {straight_high}")
+    
+    # Regular straights (check this LAST)
+    elif values[0] - values[1] == 1 and values[1] - values[2] == 1:
+        is_straight = True
+        straight_high = values[0]
+        # print(f"DEBUG: Detected regular straight with values {values}, straight_high = {straight_high}")
     
     # Straight Flush
     if is_straight and is_flush:
+        # print(f"DEBUG: Detected straight flush with straight_high = {straight_high}")
         return ("straight_flush", straight_high)
     
     # Three of a Kind (already checked above)
@@ -279,20 +290,33 @@ def compare_hands_main_bet(player_hand, dealer_hand):
     player_combo, player_value = evaluate_high_hand(player_hand)
     dealer_combo, dealer_value = evaluate_high_hand(dealer_hand)
     
+    # Debug logging
+    # print(f"DEBUG: Player hand: {player_hand} -> {player_combo}, {player_value}")
+    # print(f"DEBUG: Dealer hand: {dealer_hand} -> {dealer_combo}, {dealer_value}")
+    
     player_rank = HIGH_HAND_RANKINGS[player_combo]
     dealer_rank = HIGH_HAND_RANKINGS[dealer_combo]
     
+    # print(f"DEBUG: Player rank: {player_rank}, Dealer rank: {dealer_rank}")
+    # print(f"DEBUG: Player value: {player_value}, Dealer value: {dealer_value}")
+    
     if player_rank > dealer_rank:
+        # print("DEBUG: Player wins by rank")
         return "player_wins"
     elif player_rank < dealer_rank:
+        # print("DEBUG: Dealer wins by rank")
         return "dealer_wins"
     else:
         # Same combination type, compare values
+        # print("DEBUG: Same rank, comparing values")
         if player_value > dealer_value:
+            # print("DEBUG: Player wins by value")
             return "player_wins"
         elif player_value < dealer_value:
+            # print("DEBUG: Dealer wins by value")
             return "dealer_wins"
         else:
+            print("DEBUG: Tie")
             return "tie"
 
 async def handle_connection(websocket):
