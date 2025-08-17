@@ -11,7 +11,7 @@ const Card: React.FC<CardProps> = ({ card, hidden = false, isDealer}) => {
   const [currPage, setCurrPage] = useState<'dealer' | 'player' | 'stats'>('stats');
   let cardSize = '';
   if (currPage === 'player') {
-    cardSize = 'w-[10rem] h-[14rem] mt-2 mb-6';
+    cardSize = 'w-[12rem] h-[16rem] mt-2 mb-6';
   } else if (currPage === 'dealer') {
     cardSize = 'w-20 h-28';
   } else if (currPage === 'stats') {
