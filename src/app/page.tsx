@@ -7,10 +7,10 @@ import StatsHand from '@/components/StatsHand';
 const playerGrid = [
   // [playerId, gridClass]
   ['player1', 'col-start-1 col-end-4 row-start-2 row-end-4 flex items-center justify-end z-10 mr-28'],
-  ['player2', 'col-start-1 col-end-4 row-start-4 row-end-7 flex items-center justify-end z-10 mb-32'],
+  ['player2', 'col-start-1 col-end-4 row-start-4 row-end-7 flex items-center justify-end z-10 mb-36'],
   ['player3', 'col-start-2 col-end-5 row-start-6 row-end-8 flex items-center justify-end z-10'],
   ['player4', 'col-start-6 col-end-9 row-start-6 row-end-8 flex items-center justify-center z-10'],
-  ['player5', 'col-start-7 col-end-10 row-start-4 row-end-7 flex items-center justify-center z-10 mb-32'],
+  ['player5', 'col-start-7 col-end-10 row-start-4 row-end-7 flex items-center justify-center z-10 mb-36'],
   ['player6', 'col-start-7 col-end-10 row-start-2 row-end-4 flex items-center justify-center z-10 ml-28'],
 ];
 
