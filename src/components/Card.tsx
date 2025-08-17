@@ -47,7 +47,7 @@ const Card: React.FC<CardProps> = ({ card, hidden = false, isDealer}) => {
   // If it's an empty slot (card === 'back')
   if (card === 'back') {
     return (
-      <div className={`${cardSize} rounded-lg shadow-xl transform`}>
+      <div className={`${cardSize} rounded-lg shadow-2xl transform`}>
         <img 
           src="/cards/card_back.png" 
           alt="Card Back"
