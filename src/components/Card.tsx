@@ -15,7 +15,7 @@ const Card: React.FC<CardProps> = ({ card, hidden = false, isDealer}) => {
   } else if (currPage === 'dealer') {
     cardSize = 'w-20 h-28';
   } else if (currPage === 'stats') {
-    cardSize = 'w-[14rem] h-[19rem]'; // Further increased size for stats page
+    cardSize = 'w-[11.5rem] h-[18rem]'; // Further increased size for stats page
   }
   const [isTouched, setIsTouched] = useState(false);
 
@@ -47,11 +47,11 @@ const Card: React.FC<CardProps> = ({ card, hidden = false, isDealer}) => {
   // If it's an empty slot (card === 'back')
   if (card === 'back') {
     return (
-      <div className={`${cardSize} rounded-lg shadow-2xl transform`}>
+      <div className={`${cardSize} rounded-lg shadow-xl transform`}>
         <img 
           src="/cards/card_back.png" 
           alt="Card Back"
-          className="w-full h-full object-fill border-2 border-[darkRed] rounded-lg"
+          className="w-full h-full object-fill border-2 border-[darkRed] rounded-lg scale-95"
         />
       </div>
     );
