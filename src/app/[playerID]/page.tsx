@@ -211,7 +211,7 @@ export default function PlayerView() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#450A03]">
+    <div className="h-screen flex flex-col bg-[#450A03] overflow-y-hidden">
       <Client_Navbar />
       <div
         className="flex-1 m-3 poko p-2 bg-[#911606] flex justify-center"
