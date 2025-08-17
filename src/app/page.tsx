@@ -6,12 +6,12 @@ import StatsHand from '@/components/StatsHand';
 
 const playerGrid = [
   // [playerId, gridClass]
-  ['player1', 'col-start-2 col-end-4 row-start-2 row-end-4 flex items-center justify-center z-10'],
-  ['player2', 'col-start-3 col-end-4 row-start-4 row-end-7 flex items-center justify-center z-10 mb-16'],
-  ['player3', 'col-start-4 col-end-5 row-start-6 row-end-8 flex items-center justify-center z-10'],
-  ['player4', 'col-start-6 col-end-7 row-start-6 row-end-8 flex items-center justify-center z-10'],
-  ['player5', 'col-start-7 col-end-8 row-start-4 row-end-7 flex items-center justify-center z-10 mb-16'],
-  ['player6', 'col-start-7 col-end-9 row-start-2 row-end-4 flex items-center justify-center z-10'],
+  ['player1', 'col-start-1 col-end-4 row-start-2 row-end-4 flex items-center justify-end z-10'],
+  ['player2', 'col-start-2 col-end-4 row-start-4 row-end-7 flex items-center justify-end z-10 mb-32'],
+  ['player3', 'col-start-3 col-end-5 row-start-6 row-end-8 flex items-center justify-end z-10'],
+  ['player4', 'col-start-6 col-end-8 row-start-6 row-end-8 flex items-center justify-center z-10'],
+  ['player5', 'col-start-7 col-end-9 row-start-4 row-end-7 flex items-center justify-center z-10 mb-32'],
+  ['player6', 'col-start-7 col-end-10 row-start-2 row-end-4 flex items-center justify-center z-10'],
 ];
 
 // Add a type for player (partial, as only relevant fields are used)
@@ -88,7 +88,7 @@ const StatsPage = () => {
         </nav>
         <div className='poko flex-1 grid grid-cols-9 grid-rows-9 w-[96vw] h-[79vh]'>
           <div className="col-start-1 col-end-2 row-start-2 row-end-8 flex items-center justify-center z-10">
-            <img src="/assets/side_design.png" alt="Side Design" className="w-full h-full object-contain" />
+            <img src="/assets/side_design.png" alt="Side Design" className="w-full h-full object-contain transform scale-x-[-1]" />
           </div>
           <div className="col-start-9 col-end-10 row-start-2 row-end-8 flex items-center justify-center z-10">
             <img src="/assets/side_design.png" alt="Side Design" className="w-full h-full object-contain" />
@@ -116,7 +116,7 @@ const StatsPage = () => {
             const overlay = stateToOverlay[state as keyof typeof stateToOverlay];
             return (
               <div key={playerId} className={gridClass}>
-                <div className="w-[17vw] h-[17vh] flex flex-row items-center justify-center">
+                <div className="w-full h-[17vh]] flex flex-row items-top justify-end">
                   <div>
                     <StatsHand
                       playerId={playerId}
@@ -128,8 +128,8 @@ const StatsPage = () => {
                       showCards={gameState.game_phase === 'revealed'}
                     />
                   </div>
-                  <div className="relative w-[8vw] h-[14vh] flex items-center justify-center ml-2">
-                    <img src={imgSrc} alt="Player State" className="w-full h-full object-contain" />
+                  <div className="relative w-[8vw] h-[14vh] flex items-center justify-center">
+                    <img src={imgSrc} alt="Player State" className="w-[12rem] h-[12rem] object-contain" />
                     <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-white px-4 py-2 text-xl flex flex-col items-center">
                       <div className='font-bold text-5xl'>{idx + 1}</div>
                       <div>{overlay}</div>
@@ -146,9 +146,9 @@ const StatsPage = () => {
             const overlay = stateToOverlay[state as keyof typeof stateToOverlay];
             return (
               <div key={playerId} className={gridClass}>
-                <div className="w-[17vw] h-[17vh] flex flex-row items-center justify-center">
+                <div className="w-full h-[17vh] flex flex-row items-top justify-start">
                   <div className="relative w-[8vw] h-[14vh] flex items-center justify-center mr-2">
-                    <img src={imgSrc} alt="Player State" className="w-full h-full object-contain" />
+                    <img src={imgSrc} alt="Player State" className="w-[12rem] h-[12rem] object-contain" />
                     <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-white px-4 py-2 text-2xl flex flex-col items-center">
                       <div className='font-bold text-5xl'>{idx + 4}</div>
                       <div>{overlay}</div>
