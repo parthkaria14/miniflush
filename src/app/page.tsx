@@ -244,7 +244,7 @@ const StatsPage = () => {
                 <div className="w-full h-[17vh] flex flex-row items-top justify-start">
                   <div className="relative w-[8vw] h-[14vh] flex items-center justify-center mr-2">
                     <img src={imgSrc} alt="Player State" className="w-[12rem] h-[12rem] object-contain" />
-                    <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-white px-4 py-2 text-2xl flex flex-col items-center">
+                    <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-white px-4 py-2 text-4xl flex flex-col items-center">
                       <div className='font-bold text-5xl'>{idx + 4}</div>
                       <div>{overlay}</div>
                     </div>
@@ -267,7 +267,7 @@ const StatsPage = () => {
 
           <div className="col-start-5 col-end-6 row-start-1 row-end-3 flex flex-col items-center justify-center z-10">
             {/* <div className='text-4xl text-yellow-500'>Dealer</div>
-            <div className='flex items-center justify-center text-2xl text-yellow-500 whitespace-nowrap'>
+            <div className='flex items-center justify-center text-4xl text-yellow-500 whitespace-nowrap'>
               Table : {gameState.table_number}
             </div> */}
             <img src="/assets/ocean7.png" alt="Side Design" className="w-full h-full object-contain" />
@@ -285,7 +285,63 @@ const StatsPage = () => {
           </footer>
         </div>
       </div>
-      <div className='absolute text-4xl bottom-0 text-center'>THIS IS AN ELECTRONIC GAME INCASE OF ANY GRIEVANCES THE MANAGEMENT DECISION WILL BE FINAL.</div>
+      <div className="w-[96vw] relative overflow-hidden">
+        <div className="flex whitespace-nowrap animate-marquee">
+          <span className="mx-4 text-4xl font-semibold text-red-600">
+            THIS IS AN ELECTRONIC GAME INCASE OF ANY GRIEVANCES THE MANAGEMENT
+            DECISION WILL BE FINAL
+          </span>
+          <span
+            className="mx-4 text-4xl font-semibold text-red-600"
+            aria-hidden="true"
+          >
+            THIS IS AN ELECTRONIC GAME INCASE OF ANY GRIEVANCES THE MANAGEMENT
+            DECISION WILL BE FINAL
+          </span>
+          <span
+            className="mx-4 text-4xl font-semibold text-red-600"
+            aria-hidden="true"
+          >
+            THIS IS AN ELECTRONIC GAME INCASE OF ANY GRIEVANCES THE MANAGEMENT
+            DECISION WILL BE FINAL
+          </span>
+          <span
+            className="mx-4 text-4xl font-semibold text-red-600"
+            aria-hidden="true"
+          >
+            THIS IS AN ELECTRONIC GAME INCASE OF ANY GRIEVANCES THE MANAGEMENT
+            DECISION WILL BE FINAL
+          </span>
+          <span
+            className="mx-4 text-4xl font-semibold text-red-600"
+            aria-hidden="true"
+          >
+            THIS IS AN ELECTRONIC GAME INCASE OF ANY GRIEVANCES THE MANAGEMENT
+            DECISION WILL BE FINAL
+          </span>
+          <span
+            className="mx-4 text-4xl font-semibold text-red-600"
+            aria-hidden="true"
+          >
+            THIS IS AN ELECTRONIC GAME INCASE OF ANY GRIEVANCES THE MANAGEMENT
+            DECISION WILL BE FINAL
+          </span>
+          <span
+            className="mx-4 text-4xl font-semibold text-red-600"
+            aria-hidden="true"
+          >
+            THIS IS AN ELECTRONIC GAME INCASE OF ANY GRIEVANCES THE MANAGEMENT
+            DECISION WILL BE FINAL
+          </span>
+          <span
+            className="mx-4 text-4xl font-semibold text-red-600"
+            aria-hidden="true"
+          >
+            THIS IS AN ELECTRONIC GAME INCASE OF ANY GRIEVANCES THE MANAGEMENT
+            DECISION WILL BE FINAL
+          </span>
+        </div>
+      </div>
     </div>
   );
 };
