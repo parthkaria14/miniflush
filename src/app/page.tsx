@@ -57,6 +57,101 @@ const stateToOverlay: Partial<Record<'won' | 'lost' | 'ante' | 'fold' | 'tie', s
 const StatsPage = () => {
   const { gameState } = useWebSocket();
   console.log(gameState)
+  function sortHand(hand: string[]): string[] {
+    const rankOrder: { [key: string]: number } = {
+      "2": 2,
+      "3": 3,
+      "4": 4,
+      "5": 5,
+      "6": 6,
+      "7": 7,
+      "8": 8,
+      "9": 9,
+      "T": 10,
+      J: 11,
+      Q: 12,
+      K: 13,
+      A: 14,
+    };
+
+    // Extract rank + suit info
+    const cards = hand.map((card) => {
+      const rank = card.slice(0, -1);
+      const suit = card.slice(-1);
+      return { card, rank, suit, value: rankOrder[rank] };
+    });
+
+    // Count ranks
+    const rankCount: Record<string, number> = {};
+    cards.forEach((c) => {
+      rankCount[c.rank] = (rankCount[c.rank] || 0) + 1;
+    });
+
+    // Detect trail (3 of same rank)
+    if (Object.values(rankCount).includes(3)) {
+      return cards.sort((a, b) => b.value - a.value).map((c) => c.card);
+    }
+
+    // Detect pair (2 of same rank)
+    if (Object.values(rankCount).includes(2)) {
+      cards.sort((a, b) => {
+        const countDiff = rankCount[b.rank] - rankCount[a.rank];
+        if (countDiff !== 0) return countDiff; // group the pair
+        return b.value - a.value;
+      });
+      return cards.map((c) => c.card);
+    }
+
+    // Detect flush (all suits same)
+    const isFlush = cards.every((c) => c.suit === cards[0].suit);
+
+    // Detect straight (Ace high or Ace low)
+    const values = cards.map((c) => c.value).sort((a, b) => a - b);
+    const uniqueValues = Array.from(new Set(values));
+    let isStraight = false;
+
+    if (uniqueValues.length === 3) {
+      // Normal straight check
+      if (uniqueValues[2] - uniqueValues[0] === 2) {
+        isStraight = true;
+      }
+      // Ace-low straight (A=14, treat as 1)
+      if (
+        uniqueValues.includes(14) &&
+        uniqueValues.includes(2) &&
+        uniqueValues.includes(3)
+      ) {
+        isStraight = true;
+      }
+    }
+
+    if (isStraight && isFlush) {
+      return cards.sort((a, b) => b.value - a.value).map((c) => c.card); // Pure Sequence
+    }
+    if (isStraight) {
+      // Special case: A-2-3 → sort as 3-2-A (Ace shown last)
+      if (
+        uniqueValues.includes(14) &&
+        uniqueValues.includes(2) &&
+        uniqueValues.includes(3)
+      ) {
+        return cards
+          .sort((a, b) => {
+            if (a.value === 14) return 1; // Ace goes last
+            if (b.value === 14) return -1;
+            return b.value - a.value;
+          })
+          .map((c) => c.card);
+      }
+      return cards.sort((a, b) => b.value - a.value).map((c) => c.card); // Normal straight
+    }
+    if (isFlush) {
+      return cards.sort((a, b) => b.value - a.value).map((c) => c.card); // Flush
+    }
+
+    // Default: just sort high card
+    return cards.sort((a, b) => b.value - a.value).map((c) => c.card);
+  }
   return (
     <div className="min-h-screen bg-[#D6AB5D] flex flex-col items-center justify-center">
       <div className="h-[94vh] w-[96vw] m-3 bg-[#971909] flex flex-col">
@@ -99,7 +194,7 @@ const StatsPage = () => {
           <div className='col-start-4 col-end-7 row-start-3 row-end-6 flex justify-center items-center realtive z-10'>
             <StatsHand
               playerId="dealer"
-              hand={gameState.dealer_hand || []}
+              hand={sortHand(gameState.dealer_hand || [])}
               active={true}
               result={null}
               isDealer={true}
@@ -120,7 +215,7 @@ const StatsPage = () => {
                   <div>
                     <StatsHand
                       playerId={playerId}
-                      hand={player.hand || []}
+                      hand={sortHand(player.hand || [])}
                       active={!!player.active}
                       result={player.result || null}
                       has_acted={player.has_acted}
@@ -157,7 +252,7 @@ const StatsPage = () => {
                   <div>
                     <StatsHand
                       playerId={playerId}
-                      hand={player.hand || []}
+                      hand={sortHand(player.hand || [])}
                       active={!!player.active}
                       result={player.result || null}
                       has_acted={player.has_acted}
