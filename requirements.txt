@@ -1,0 +1,4 @@
+pymotor
+pymongo
+pyserial
+pyinstaller
