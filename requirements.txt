@@ -2,3 +2,4 @@ pymotor
 pymongo
 pyserial
 pyinstaller
+websockets
