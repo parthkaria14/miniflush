@@ -49,8 +49,8 @@ const Client_Navbar: React.FC<Client_NavbarProps> = ({
             <Image
               src="/assets/ocean7.png"
               alt="Left Logo"
-              width={75}
-              height={75}  
+              width={120}
+              height={120}  
               className="object-contain"
             />
             {/* <div className="text-white text-xl mt-2">

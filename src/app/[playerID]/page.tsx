@@ -416,10 +416,10 @@ export default function PlayerView() {
 
           {/* Player Actions */}
           {currentPlayer && (
-            <div className="flex justify-center gap-4 mb-2">
+            <div className="flex justify-around gap-4 mb-2">
               <button
                 onClick={handlePlay}
-                className={`px-6 py-2 bg-green-500 text-white rounded-lg transition-colors
+                className={`px-6 py-2 bg-green-500 text-white rounded-lg transition-colors text-3xl
                   ${
                     isCurrentPlayerActive &&
                     !hasCurrentPlayerActed &&
@@ -437,7 +437,7 @@ export default function PlayerView() {
               </button>
               <button
                 onClick={() => setShowPlayerCards(!showPlayerCards)}
-                className={`px-4 py-2 rounded transition-colors duration-200 bg-[#741003]
+                className={`px-4 py-2 rounded transition-colors duration-200 bg-[#741003] text-3xl
                       text-white ${
                         !isConnected || !isCurrentPlayerActive
                           ? "opacity-50 cursor-not-allowed"
@@ -449,7 +449,7 @@ export default function PlayerView() {
               </button>
               <button
                 onClick={handleSurrender}
-                className={`px-6 py-2 bg-red-500 text-white rounded-lg transition-colors
+                className={`px-6 py-2 bg-red-500 text-white rounded-lg transition-colors text-3xl
                   ${
                     isCurrentPlayerActive &&
                     !hasCurrentPlayerActed &&

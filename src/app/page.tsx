@@ -158,8 +158,8 @@ const StatsPage = () => {
         <nav className="w-full h-[15vh] relative flex items-center justify-between px-8">
           {/* Left: Table Number */}
           <div className="relative z-20 flex flex-col items-center justify-center">
-            <div className="text-6xl text-yellow-500">Table</div>
-            <div className="text-6xl text-yellow-500">{(() => { const t = String(safeTableNumber(gameState.table_number)); return t.match(/^\d+FT$/) ? `FT-${t.replace('FT', '')}` : `FT-${t}`; })()}</div>
+            <div className="text-8xl text-yellow-500">Table</div>
+            <div className="text-8xl text-yellow-500">{(() => { const t = String(safeTableNumber(gameState.table_number)); return t.match(/^\d+FT$/) ? `FT-${t.replace('FT', '')}` : `FT-${t}`; })()}</div>
           </div>
           {/* Center: Wood background and Royal Flush */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full flex items-center justify-center pointer-events-none">
@@ -279,8 +279,8 @@ const StatsPage = () => {
               className="absolute inset-0 w-full h-full object-cover rotate-180 z-0"
             />
             <div className="relative top-4 flex flex-col items-center justify-center z-10 ml-12">
-              <div className="text-6xl text-yellow-500">Games</div>
-              <div className="text-6xl text-yellow-500">{gameState.games_played ?? 0}</div>
+              <div className="text-8xl text-yellow-500">Games</div>
+              <div className="text-8xl text-yellow-500">{gameState.games_played ?? 0}</div>
             </div>
           </footer>
         </div>
