@@ -57,12 +57,19 @@ MAX_HISTORY = 10  # Keep last 10 states
 
 # Hand rankings for HIGH side bet (higher rank = better hand)
 HIGH_HAND_RANKINGS = {
-    "high_card": 0,           # High Card (no combination) - for cards below 10
-    "ten_top": 0,             # Ten Top
-    "jack_top": 0,            # Jack Top  
-    "queen_top": 0,           # Queen Top
-    "king_top": 0,            # King Top
-    "ace_top": 0,             # Ace Top
+    "2_top": 0,              # 2 Top
+    "3_top": 0,              # 3 Top
+    "4_top": 0,              # 4 Top
+    "5_top": 0,              # 5 Top
+    "6_top": 0,              # 6 Top
+    "7_top": 0,              # 7 Top
+    "8_top": 0,              # 8 Top
+    "9_top": 0,              # 9 Top
+    "ten_top": 0,            # Ten Top
+    "jack_top": 0,           # Jack Top  
+    "queen_top": 0,          # Queen Top
+    "king_top": 0,           # King Top
+    "ace_top": 0,            # Ace Top
     "pair": 1,                # One Pair  
     "flush": 2,               # Flush (all same suit)
     "straight": 3,            # Straight (sequence)
@@ -82,7 +89,7 @@ HIGH_PAYOUTS = {
     "queen_top": 0,        # Queen Top
     "jack_top": 0,         # Jack Top
     "ten_top": 0,          # Ten Top
-    "high_card": 0         # For cards below 10
+    # "high_card": 0         # For cards below 10
 }
 
 # LOW side bet payouts (typical casino payouts)
@@ -151,8 +158,6 @@ def evaluate_high_hand(hand):
     values = sorted([get_card_value(card) for card in hand], reverse=True)
     suits = [get_card_suit(card) for card in hand]
     
-    # print(f"DEBUG: Evaluating hand {hand} -> values: {values}, suits: {suits}")
-    
     # Three of a Kind
     if values[0] == values[1] == values[2]:
         return ("three_of_a_kind", values[0])
@@ -164,30 +169,24 @@ def evaluate_high_hand(hand):
     is_straight = False
     straight_high = 0
     
-    # Special case: A-K-Q straight (Ace high) - any position/order (check this FIRST)
+    # Special case: A-K-Q straight (Ace high)
     if set(values) == {12, 13, 14}:
         is_straight = True
-        straight_high = 17  # A-K-Q in any order is the highest straight (17 > 15 > 13)
-        # print(f"DEBUG: Detected A-K-Q straight with values {values}, straight_high = {straight_high}")
+        straight_high = 17
     
     # Special case: A-2-3 straight (Ace low)
     elif set(values) == {2, 3, 14}:
         is_straight = True
-        straight_high = 15  # A-2-3 is second highest straight (15 > 13 for JQK)
-        # print(f"DEBUG: Detected A-2-3 straight with values {values}, straight_high = {straight_high}")
+        straight_high = 15
     
-    # Regular straights (check this LAST)
+    # Regular straights
     elif values[0] - values[1] == 1 and values[1] - values[2] == 1:
         is_straight = True
         straight_high = values[0]
-        # print(f"DEBUG: Detected regular straight with values {values}, straight_high = {straight_high}")
     
     # Straight Flush
     if is_straight and is_flush:
-        # print(f"DEBUG: Detected straight flush with straight_high = {straight_high}")
         return ("straight_flush", straight_high)
-    
-    # Three of a Kind (already checked above)
     
     # Straight  
     if is_straight:
@@ -199,24 +198,42 @@ def evaluate_high_hand(hand):
     
     # Pair
     if values[0] == values[1]:
-        return ("pair", values[0] * 100 + values[2])  # pair value * 100 + kicker
+        return ("pair", values[0] * 100 + values[2])
     elif values[1] == values[2]:
-        return ("pair", values[1] * 100 + values[0])  # pair value * 100 + kicker
+        return ("pair", values[1] * 100 + values[0])
     
-    # High Card - return specific high card type
+    # High Card - return specific high card type based on highest card
     highest_card = values[0]
-    if highest_card == 14:  # Ace
-        return ("ace_top", values[0] * 10000 + values[1] * 100 + values[2])
-    elif highest_card == 13:  # King
-        return ("king_top", values[0] * 10000 + values[1] * 100 + values[2])
-    elif highest_card == 12:  # Queen
-        return ("queen_top", values[0] * 10000 + values[1] * 100 + values[2])
-    elif highest_card == 11:  # Jack
-        return ("jack_top", values[0] * 10000 + values[1] * 100 + values[2])
-    elif highest_card == 10:  # Ten
-        return ("ten_top", values[0] * 10000 + values[1] * 100 + values[2])
+    tiebreaker = values[0] * 10000 + values[1] * 100 + values[2]
+    
+    if highest_card == 14:
+        return ("ace_top", tiebreaker)
+    elif highest_card == 13:
+        return ("king_top", tiebreaker)
+    elif highest_card == 12:
+        return ("queen_top", tiebreaker)
+    elif highest_card == 11:
+        return ("jack_top", tiebreaker)
+    elif highest_card == 10:
+        return ("ten_top", tiebreaker)
+    elif highest_card == 9:
+        return ("9_top", tiebreaker)
+    elif highest_card == 8:
+        return ("8_top", tiebreaker)
+    elif highest_card == 7:
+        return ("7_top", tiebreaker)
+    elif highest_card == 6:
+        return ("6_top", tiebreaker)
+    elif highest_card == 5:
+        return ("5_top", tiebreaker)
+    elif highest_card == 4:
+        return ("4_top", tiebreaker)
+    elif highest_card == 3:
+        return ("3_top", tiebreaker)
+    elif highest_card == 2:
+        return ("2_top", tiebreaker)
     else:
-        return ("high_card", values[0] * 10000 + values[1] * 100 + values[2])
+        return ("high_card", tiebreaker)
 
 def evaluate_low_hand(hand):
     """Evaluates hand for LOW side bet - returns winning condition or None."""
@@ -245,7 +262,7 @@ def evaluate_low_hand(hand):
     
     # Check low conditions (must be NO pair, NO flush, NO straight)
     high_combo, _ = evaluate_high_hand(hand)
-    if high_combo not in ["high_card", "ten_top", "jack_top", "queen_top", "king_top", "ace_top"]:
+    if high_combo not in ["ten_top", "jack_top", "queen_top", "king_top", "ace_top"]:
         return None  # Has a combination, so doesn't qualify for low bet
     
     # Check low conditions based on highest card
