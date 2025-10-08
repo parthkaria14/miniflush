@@ -205,7 +205,7 @@ const StatsPage = () => {
           </div>
 
           {playerGrid.slice(0, 3).map(([playerId, gridClass], idx) => {
-            const player = gameState.players?.[playerId] || {};
+            const player = gameState.players?.[`player${6-idx}`] || {};
             const state = getPlayerState(player);
             const imgSrc = stateToImg[state];
             const overlay = stateToOverlay[state as keyof typeof stateToOverlay];
@@ -226,7 +226,7 @@ const StatsPage = () => {
                   <div className="relative w-[8vw] h-[14vh] flex items-center justify-center">
                     <img src={imgSrc} alt="Player State" className="w-[12rem] h-[12rem] object-contain" />
                     <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-white px-4 py-2 text-xl flex flex-col items-center">
-                      <div className='font-bold text-5xl'>{idx + 1}</div>
+                      <div className='font-bold text-5xl'>{6 -idx}</div>
                       <div>{overlay}</div>
                     </div>
                   </div>
@@ -235,7 +235,7 @@ const StatsPage = () => {
             );
           })}
           {playerGrid.slice(3).map(([playerId, gridClass], idx) => {
-            const player = gameState.players?.[playerId] || {};
+            const player = gameState.players?.[`player${3 - idx}`] || {};
             const state = getPlayerState(player);
             const imgSrc = stateToImg[state];
             const overlay = stateToOverlay[state as keyof typeof stateToOverlay];
@@ -245,7 +245,7 @@ const StatsPage = () => {
                   <div className="relative w-[8vw] h-[14vh] flex items-center justify-center mr-2">
                     <img src={imgSrc} alt="Player State" className="w-[12rem] h-[12rem] object-contain" />
                     <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-white px-4 py-2 text-4xl flex flex-col items-center">
-                      <div className='font-bold text-5xl'>{idx + 4}</div>
+                      <div className='font-bold text-5xl'>{3 - idx}</div>
                       <div>{overlay}</div>
                     </div>
                   </div>
